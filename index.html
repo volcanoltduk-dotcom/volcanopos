@@ -269,7 +269,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
   getFirestore, collection, addDoc, onSnapshot,
-  doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp
+  doc, updateDoc, deleteDoc, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── FIREBASE CONFIG ──
@@ -441,8 +441,8 @@ var knownIds = {};
 
 function startListener() {
   setSyncStatus('syncing','連接中…');
-  var q = query(collection(db,'orders'), orderBy('createdAt','desc'));
-  onSnapshot(q,
+  // 唔用 orderBy 避免需要建立 index
+  onSnapshot(collection(db,'orders'),
     function(snapshot) {
       setSyncStatus('connected','即時同步 Live ✓');
       orders = [];
@@ -452,12 +452,13 @@ function startListener() {
         o._fsId = d.id;
         orders.push(o);
         firestoreIds[o.no] = d.id;
-        // Flash new tickets
         if (!knownIds[d.id]) {
           knownIds[d.id] = true;
           setTimeout(function(fid){ flashTicket(fid); }, 300, d.id);
         }
       });
+      // Sort by ts descending locally
+      orders.sort(function(a,b){ return (b.ts||'').localeCompare(a.ts||''); });
       renderStations();
     },
     function(err) {
@@ -759,7 +760,7 @@ window.sendOrder = async function(){
   var stations=Object.keys(byStation);
   var now=new Date(),hh=now.getHours(),mm=now.getMinutes();
   var ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
-  var orderDoc={no:no,table:currentTable,byStation:byStation,tot:tot,rmk:rmk,done:{},stations:stations,ts:ts,createdAt:serverTimestamp()};
+  var orderDoc={no:no,table:currentTable,byStation:byStation,tot:tot,rmk:rmk,done:{},stations:stations,ts:ts,createdMs:Date.now()};
   try{
     await addDoc(collection(db,'orders'), orderDoc);
     cart=[]; document.getElementById('rmk').value='';
@@ -849,7 +850,24 @@ window.delOrder = async function(no){
 window.openManage = function(){
   var stNames={water:'💧 水吧',fire:'🔥 火位',noodle:'🍜 麵位'};
   var stKeys=['water','fire','noodle'];
-  var h='<div class="modal-handle"></div><div class="modal-title" style="margin-bottom:10px">管理菜單 Manage Menu</div>';
+  // Summary stats
+  var totalSales=0, totalOrders=orders.length;
+  for(var i=0;i<orders.length;i++) totalSales+=orders[i].tot||0;
+  var h='<div class="modal-handle"></div><div class="modal-title" style="margin-bottom:6px">管理 Manage</div>';
+  // Sales summary
+  h+='<div style="background:var(--noodle-bg);border-radius:10px;padding:10px 12px;margin-bottom:12px">'+
+    '<div style="font-size:11px;color:var(--noodle-t);font-weight:700;margin-bottom:4px">今日訂單 Today\'s Orders</div>'+
+    '<div style="display:flex;gap:16px">'+
+    '<div><div style="font-size:20px;font-weight:700;color:var(--text)">'+totalOrders+'</div><div style="font-size:10px;color:var(--text3)">訂單數</div></div>'+
+    '<div><div style="font-size:20px;font-weight:700;color:var(--text)">£'+totalSales.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3)">總銷售額</div></div>'+
+    '</div></div>';
+  // Action buttons
+  h+='<div style="display:flex;gap:8px;margin-bottom:14px">'+
+    '<button onclick="downloadCSV()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--noodle);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📥 下載訂單 CSV</button>'+
+    '<button onclick="clearAllOrders()" style="flex:1;padding:10px;border:1px solid #c0392b;border-radius:10px;background:transparent;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑 清除所有單</button>'+
+    '</div>';
+  // Pause items
+  h+='<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">暫停菜式 Pause Items</div>';
   for(var s=0;s<stKeys.length;s++){
     var st=stKeys[s];
     h+='<div class="manage-sec">'+stNames[st]+'</div>';
@@ -861,9 +879,59 @@ window.openManage = function(){
         '<button class="pause-btn'+(ip?' paused':'')+'" onclick="togglePause('+i+')">'+(ip?'恢復 Resume':'暫停 Pause')+'</button></div>';
     }
   }
-  h+='<div style="margin-top:16px"><button onclick="closeManage()" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--text);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;">關閉 Close</button></div>';
+  h+='<div style="margin-top:16px"><button onclick="closeManage()" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--text);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">關閉 Close</button></div>';
   document.getElementById('manage-sheet').innerHTML=h;
   document.getElementById('manage-overlay').classList.add('on');
+};
+
+window.downloadCSV = function(){
+  if(!orders.length){ alert('暫無訂單資料'); return; }
+  var rows=[['單號','枱號','時間','合計(£)','備注','項目詳情']];
+  for(var i=0;i<orders.length;i++){
+    var o=orders[i];
+    var items=[];
+    var stKeys2=Object.keys(o.byStation||{});
+    for(var j=0;j<stKeys2.length;j++){
+      var stItems=o.byStation[stKeys2[j]];
+      for(var k=0;k<stItems.length;k++){
+        var it=stItems[k];
+        if(!it.isTask) items.push(it.zh+'×'+it.qty+(it.mods?' ('+it.mods+')':''));
+      }
+    }
+    rows.push([
+      o.no||'',
+      o.table||'',
+      o.ts||'',
+      (o.tot||0).toFixed(2),
+      o.rmk||'',
+      '"'+items.join(' | ')+'"'
+    ]);
+  }
+  // Add summary row
+  var totalS=0; for(var i=0;i<orders.length;i++) totalS+=orders[i].tot||0;
+  rows.push(['','','合計 TOTAL','£'+totalS.toFixed(2),'','']);
+  var csv=rows.map(function(r){return r.join(',');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  var today=new Date();
+  var dateStr=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+  a.href=url; a.download='VOLCANO_orders_'+dateStr+'.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+};
+
+window.clearAllOrders = async function(){
+  if(!confirm('確認清除所有訂單？此操作不可還原！\nConfirm clear ALL orders? Cannot be undone!')) return;
+  closeManage();
+  setSyncStatus('syncing','清除中…');
+  try{
+    var snap=await getDocs(collection(db,'orders'));
+    var dels=[];
+    snap.forEach(function(d){ dels.push(deleteDoc(doc(db,'orders',d.id))); });
+    await Promise.all(dels);
+    setSyncStatus('connected','即時同步 Live ✓');
+  }catch(e){ setSyncStatus('error','清除失敗'); console.error(e); }
 };
 window.closeManage = function(){ document.getElementById('manage-overlay').classList.remove('on'); };
 window.togglePause = function(idx){

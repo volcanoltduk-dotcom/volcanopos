@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>🌋 VOLCANO POS</title>
 <style>
@@ -12,7 +12,6 @@
   --water:#185FA5;--water-bg:#E6F1FB;--water-t:#0C447C;
   --fire:#BA7517;--fire-bg:#FAEEDA;--fire-t:#633806;
   --noodle:#0F6E56;--noodle-bg:#E1F5EE;--noodle-t:#085041;
-  --done-bg:#EAF3DE;--done-t:#3B6D11;--done-bd:#639922;
   --bg:#f5f4f0;--card:#ffffff;--border:#e0ddd6;--border2:#c8c4bb;
   --text:#1a1a1a;--text2:#555;--text3:#999;
   --radius:10px;--radius-lg:14px;
@@ -22,38 +21,25 @@
 }
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text)}
 .app{display:flex;flex-direction:column;height:100vh;height:100dvh}
-/* SYNC STATUS BAR */
-.sync-bar{display:flex;align-items:center;gap:6px;padding:4px 14px;background:#1a1a2e;font-size:11px;font-weight:600;flex-shrink:0}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:#636366;flex-shrink:0}
-.sync-dot.connected{background:#30d158}
-.sync-dot.syncing{background:#ffd60a;animation:pulse .8s infinite}
-.sync-dot.error{background:#ff453a}
-.sync-label{color:#aeaeb2}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-/* TOP BAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
 .logo{font-size:15px;font-weight:700;color:var(--text)}.logo em{color:var(--fire);font-style:normal}
 .vtabs{display:flex;gap:4px}
-.vtab{padding:6px 12px;border:1px solid var(--border2);border-radius:99px;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2)}
+.vtab{padding:6px 12px;border:1px solid var(--border2);border-radius:99px;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);font-family:inherit}
 .vtab.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-/* TABLE BAR */
 .table-bar{padding:7px 12px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
 .table-row1{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .table-label{font-size:12px;font-weight:700;color:var(--text2);white-space:nowrap}
 .tno-custom{width:58px;padding:5px 7px;border:1px solid var(--border);border-radius:99px;background:var(--bg);font-size:12px;color:var(--text);text-align:center;font-family:inherit}
 .table-scroll{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
 .table-scroll::-webkit-scrollbar{display:none}
-.tno-btn{padding:5px 10px;border:1px solid var(--border);border-radius:99px;background:var(--bg);cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.tno-btn{padding:5px 10px;border:1px solid var(--border);border-radius:99px;background:var(--bg);cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;flex-shrink:0;font-family:inherit}
 .tno-btn.on{background:var(--fire);color:#fff;border-color:var(--fire)}
-/* VIEWS */
 .view{display:none;flex:1;overflow:hidden;flex-direction:column}.view.on{display:flex}
-/* STATION TABS */
 .station-tabs{display:flex;gap:6px;padding:9px 12px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
-.stab{flex:1;padding:7px 4px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);text-align:center;line-height:1.5}
+.stab{flex:1;padding:7px 4px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);text-align:center;line-height:1.5;font-family:inherit}
 .stab.on-water{background:var(--water-bg);color:var(--water-t);border-color:var(--water)}
 .stab.on-fire{background:var(--fire-bg);color:var(--fire-t);border-color:var(--fire)}
 .stab.on-noodle{background:var(--noodle-bg);color:var(--noodle-t);border-color:var(--noodle)}
-/* MENU */
 .order-body{display:flex;flex:1;overflow:hidden;flex-direction:column}
 .menu-scroll{flex:1;overflow-y:auto;padding:10px 12px;-webkit-overflow-scrolling:touch}
 .panel{display:none}.panel.on{display:block}
@@ -67,11 +53,10 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .mitem .pr{font-size:12px;font-weight:500;color:var(--text2);margin-top:4px}
 .mitem.paused{opacity:.42;position:relative}
 .mitem.paused::after{content:'暫停';position:absolute;top:5px;right:7px;font-size:9px;font-weight:700;color:#fff;background:#c0392b;border-radius:4px;padding:1px 5px}
-/* CART */
 .cart-area{background:var(--card);border-top:1px solid var(--border);padding:10px 12px;flex-shrink:0;max-height:44vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .cart-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .cart-title{font-size:13px;font-weight:600;color:var(--text)}
-.clr-btn{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 4px}
+.clr-btn{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 4px;font-family:inherit}
 .crow{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border)}
 .crow:last-of-type{border-bottom:none}
 .cbadge{font-size:9px;padding:2px 5px;border-radius:99px;white-space:nowrap;font-weight:600;flex-shrink:0}
@@ -80,7 +65,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .cmods{font-size:10px;color:var(--text3);margin-top:1px}
 .cmods.fire{color:var(--fire-t);font-weight:600}
 .cmods.water{color:var(--water-t);font-weight:600}
-.qbtn{width:26px;height:26px;border:1px solid var(--border2);border-radius:50%;background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0;line-height:1}
+.qbtn{width:26px;height:26px;border:1px solid var(--border2);border-radius:50%;background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text);flex-shrink:0;line-height:1;font-family:inherit}
 .qty{font-size:12px;font-weight:600;min-width:18px;text-align:center;color:var(--text)}
 .cprice{font-size:12px;color:var(--text2);min-width:40px;text-align:right;font-weight:500;flex-shrink:0}
 .cart-foot-inner{padding-top:8px;border-top:1px solid var(--border);margin-top:6px}
@@ -88,11 +73,10 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .total-lbl{font-size:13px;font-weight:600;color:var(--text)}
 .total-amt{font-size:19px;font-weight:700;color:var(--text)}
-.send-btn{width:100%;padding:13px;border:none;border-radius:var(--radius);cursor:pointer;font-size:14px;font-weight:700;color:#fff;background:var(--fire)}
+.send-btn{width:100%;padding:13px;border:none;border-radius:var(--radius);cursor:pointer;font-size:14px;font-weight:700;color:#fff;background:#25D366;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
 .send-btn:active{opacity:.8}
 .empty-msg{font-size:12px;color:var(--text3);text-align:center;padding:12px 0}
 .table-warn{font-size:11px;color:var(--fire-t);background:var(--fire-bg);border-radius:6px;padding:5px 8px;margin-bottom:6px;text-align:center;display:none}
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end}
 .modal-overlay.on{display:flex}
 .modal-sheet{background:var(--card);border-radius:18px 18px 0 0;padding:16px 14px 36px;width:100%;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -103,7 +87,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .mod-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
 .mod-hint{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;margin-bottom:6px;line-height:1.5}
 .mod-opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.mod-opt{padding:7px 12px;border:1px solid var(--border);border-radius:99px;background:var(--bg);cursor:pointer;font-size:12px;color:var(--text2)}
+.mod-opt{padding:7px 12px;border:1px solid var(--border);border-radius:99px;background:var(--bg);cursor:pointer;font-size:12px;color:var(--text2);font-family:inherit}
 .mod-opt:active{opacity:.7}
 .mod-opt.sel-w{background:var(--water-bg);color:var(--water-t);border-color:var(--water);font-weight:600}
 .mod-opt.sel-f{background:var(--fire-bg);color:var(--fire-t);border-color:var(--fire);font-weight:600}
@@ -116,50 +100,14 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .topping-status.over{border-color:var(--fire);color:var(--fire-t);background:var(--fire-bg)}
 .section-divider{border:none;border-top:1px solid var(--border);margin:12px 0 10px}
 .size-opts{display:flex;gap:6px;margin-top:4px}
-.size-opt{flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);text-align:center}
+.size-opt{flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);text-align:center;font-family:inherit}
 .size-opt.sel-w{background:var(--water-bg);color:var(--water-t);border-color:var(--water)}
 .size-opt.sel-f{background:var(--fire-bg);color:var(--fire-t);border-color:var(--fire)}
 .size-opt.sel-n{background:var(--noodle-bg);color:var(--noodle-t);border-color:var(--noodle)}
 .modal-btns{display:flex;gap:8px;margin-top:16px}
 .modal-cancel{flex:0 0 80px;padding:12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:13px;color:var(--text2);font-family:inherit}
 .modal-confirm{flex:1;padding:12px;border:none;border-radius:var(--radius);background:var(--fire);color:#fff;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit}
-/* STATION VIEW */
-.station-view-body{flex:1;overflow-y:auto;padding:10px 12px;-webkit-overflow-scrolling:touch}
-.st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.st-card{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);overflow:hidden}
-.st-hd{padding:9px 12px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
-.st-hd.w{background:var(--water-bg);color:var(--water-t)}
-.st-hd.f{background:var(--fire-bg);color:var(--fire-t)}
-.st-hd.n{background:var(--noodle-bg);color:var(--noodle-t)}
-.st-cnt{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700}
-.cnt-w{background:var(--water);color:#fff}.cnt-f{background:var(--fire);color:#fff}.cnt-n{background:var(--noodle);color:#fff}
-.st-body{padding:8px 10px;min-height:50px}
-.ticket{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin-bottom:6px;background:var(--bg)}
-.ticket.all-done{opacity:.28}
-.ticket.new-flash{animation:flashNew .6s ease}
-@keyframes flashNew{0%{background:var(--fire-bg)}100%{background:var(--bg)}}
-.ticket-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-.tno{font-size:10px;color:var(--text3);font-weight:600}
-.table-tag{font-size:11px;font-weight:700;background:var(--fire);color:#fff;border-radius:6px;padding:2px 8px}
-.titem{font-size:12px;color:var(--text);padding:2px 0;line-height:1.4}
-.tmod{font-size:10px;color:var(--text3);padding-left:8px;line-height:1.5}
-.fire-task-row{background:var(--fire-bg);border:1px dashed var(--fire);border-radius:6px;padding:5px 8px;margin:3px 0;font-size:11px;color:var(--fire-t);font-weight:600}
-.water-task-row{background:var(--water-bg);border:1px dashed var(--water);border-radius:6px;padding:5px 8px;margin:3px 0;font-size:11px;color:var(--water-t);font-weight:600}
-.trmk{font-size:10px;color:var(--fire-t);background:var(--fire-bg);border-radius:5px;padding:3px 6px;margin-top:3px;display:inline-block}
-.tprog{display:flex;gap:4px;margin:6px 0 5px;flex-wrap:wrap}
-.prog{font-size:10px;padding:3px 7px;border-radius:99px;border:1px solid;font-weight:600}
-.prog.w-on{background:var(--water-bg);color:var(--water-t);border-color:var(--water)}
-.prog.f-on{background:var(--fire-bg);color:var(--fire-t);border-color:var(--fire)}
-.prog.n-on{background:var(--noodle-bg);color:var(--noodle-t);border-color:var(--noodle)}
-.prog.off{background:var(--bg);color:var(--text3);border-color:var(--border)}
-.tact{display:flex;gap:5px;margin-top:6px}
-.done-btn{flex:1;padding:7px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--card);cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);font-family:inherit}
-.done-btn.isdone{background:var(--done-bg);color:var(--done-t);border-color:var(--done-bd)}
-.done-btn:active{opacity:.7}
-.del-btn{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);cursor:pointer;font-size:11px;color:var(--text3);font-family:inherit}
-.all-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;background:var(--done-bg);color:var(--done-t);border:1px solid var(--done-bd);border-radius:99px;padding:3px 8px;margin-bottom:4px}
 .no-orders{font-size:12px;color:var(--text3);text-align:center;padding:14px 0}
-/* MANAGE */
 .manage-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-end}
 .manage-overlay.on{display:flex}
 .manage-sheet{background:var(--card);border-radius:18px 18px 0 0;padding:16px 14px 36px;width:100%;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -170,23 +118,28 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .pause-btn{padding:5px 11px;border:1px solid var(--border2);border-radius:99px;background:var(--bg);cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);font-family:inherit}
 .pause-btn.paused{background:#c0392b;color:#fff;border-color:#c0392b}
 .manage-sec{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;padding:10px 0 4px}
+.wa-info{background:#dcf8c6;border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:#075e54}
+.wa-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.wa-row:last-of-type{border-bottom:none}
+.wa-station{font-weight:600;color:var(--text)}
+.wa-num{color:var(--text3);font-family:monospace}
+.history-card{border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;background:var(--card)}
+.history-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.history-table{font-size:12px;font-weight:700;background:var(--fire);color:#fff;border-radius:6px;padding:2px 8px}
+.history-time{font-size:11px;color:var(--text3)}
+.history-tot{font-size:13px;font-weight:700;color:var(--text)}
+.history-items{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5}
 </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- SYNC STATUS -->
-  <div class="sync-bar">
-    <div class="sync-dot" id="sync-dot"></div>
-    <span class="sync-label" id="sync-label">連接中 Connecting…</span>
-  </div>
 
   <!-- TOP BAR -->
   <div class="topbar">
     <div class="logo">🌋 <em>VOLCANO</em> POS</div>
     <div class="vtabs">
       <button class="vtab on" id="vv-order" onclick="vswitch('order')">落單</button>
-      <button class="vtab" id="vv-station" onclick="vswitch('station')">崗位</button>
+      <button class="vtab" id="vv-history" onclick="vswitch('history')">歷史</button>
       <button class="vtab" onclick="openManage()">管理</button>
     </div>
   </div>
@@ -226,30 +179,17 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
               <span class="total-lbl">合計 Total</span>
               <span class="total-amt" id="tot">£0.00</span>
             </div>
-            <button class="send-btn" onclick="sendOrder()">落單並發送到各崗位 → Send to All Stations</button>
+            <button class="send-btn" onclick="sendOrder()">📲 落單並發送到 WhatsApp</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- STATION VIEW -->
-  <div class="view" id="view-station">
-    <div class="station-view-body">
-      <div class="st-grid">
-        <div class="st-card">
-          <div class="st-hd w"><span>💧 水吧 Water Bar</span><span class="st-cnt cnt-w" id="cnt-water">0</span></div>
-          <div class="st-body" id="st-water"><div class="no-orders">暫無訂單</div></div>
-        </div>
-        <div class="st-card">
-          <div class="st-hd f"><span>🔥 火位 Hot Station</span><span class="st-cnt cnt-f" id="cnt-fire">0</span></div>
-          <div class="st-body" id="st-fire"><div class="no-orders">暫無訂單</div></div>
-        </div>
-        <div class="st-card">
-          <div class="st-hd n"><span>🍜 麵位 Noodle Bar</span><span class="st-cnt cnt-n" id="cnt-noodle">0</span></div>
-          <div class="st-body" id="st-noodle"><div class="no-orders">暫無訂單</div></div>
-        </div>
-      </div>
+  <!-- HISTORY VIEW -->
+  <div class="view" id="view-history">
+    <div class="station-view-body" style="flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch" id="history-body">
+      <div class="no-orders">暫無歷史訂單</div>
     </div>
   </div>
 </div>
@@ -264,42 +204,21 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   <div class="manage-sheet" id="manage-sheet"></div>
 </div>
 
-<!-- FIREBASE SDK -->
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import {
-  getFirestore, collection, addDoc, onSnapshot,
-  doc, updateDoc, deleteDoc, getDocs
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-// ── FIREBASE CONFIG ──
-const firebaseConfig = {
-  apiKey: "AIzaSyCt0PigZYxB8-onpDzR0ybrjBblANGbDdI",
-  authDomain: "volcanopos.firebaseapp.com",
-  projectId: "volcanopos",
-  storageBucket: "volcanopos.firebasestorage.app",
-  messagingSenderId: "798685187237",
-  appId: "1:798685187237:web:936c48455ee3a58acc914c"
+<script>
+// ─────────────────────────────────────────
+// WHATSAPP NUMBERS (no + or spaces, country code first)
+// ─────────────────────────────────────────
+var WA_NUMBERS = {
+  water:  '447709386533',
+  fire:   '85260196700',
+  noodle: '447719388736'
 };
+var WA_LABELS = { water:'💧 水吧', fire:'🔥 火位', noodle:'🍜 麵位' };
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-// ── SYNC STATUS ──
-function setSyncStatus(state, msg) {
-  var dot = document.getElementById('sync-dot');
-  var lbl = document.getElementById('sync-label');
-  dot.className = 'sync-dot ' + state;
-  lbl.textContent = msg;
-}
-
-// ─────────────────────────────────────────
-// DATA
-// ─────────────────────────────────────────
 var MENU_ITEMS = [];
 var cart = [];
-var orders = []; // local mirror of Firestore
-var firestoreIds = {}; // order.no → Firestore doc id
+var orderHistory = [];
+var oNo = 1;
 var pendingItem = null;
 var custSel = {};
 var selToppings = [];
@@ -308,12 +227,7 @@ var currentTable = '';
 var pausedItems = {};
 var selGarnish = [];
 
-// ── BUBBLE TEA / DRINKS ──
-var BUBBLE_DRINKS = [
-  '台式珍珠奶茶','黑糖珍珠奶茶','朱古力珍珠奶茶','椰奶紅豆奶茶','芋泥奶茶',
-  '芒果果茶','荔枝果茶','青蘋果果茶','白桃果茶','檸檬果茶',
-  '黑茶芝士','茉莉芝士','抹茶拿鐵','罐裝飲品'
-];
+// ── DRINK / TOPPING DATA ──
 var SET_DRINKS = [
   {label:'台式珍珠奶茶',price:0},{label:'黑糖珍珠奶茶',price:0},
   {label:'朱古力珍珠奶茶',price:0},{label:'椰奶紅豆奶茶',price:0},
@@ -435,45 +349,6 @@ var MENU = {
 };
 
 // ─────────────────────────────────────────
-// FIRESTORE LISTENER — real-time sync
-// ─────────────────────────────────────────
-var knownIds = {};
-
-function startListener() {
-  setSyncStatus('syncing','連接中…');
-  // 唔用 orderBy 避免需要建立 index
-  onSnapshot(collection(db,'orders'),
-    function(snapshot) {
-      setSyncStatus('connected','即時同步 Live ✓');
-      orders = [];
-      firestoreIds = {};
-      snapshot.forEach(function(d) {
-        var o = d.data();
-        o._fsId = d.id;
-        orders.push(o);
-        firestoreIds[o.no] = d.id;
-        if (!knownIds[d.id]) {
-          knownIds[d.id] = true;
-          setTimeout(function(fid){ flashTicket(fid); }, 300, d.id);
-        }
-      });
-      // Sort by ts descending locally
-      orders.sort(function(a,b){ return (b.ts||'').localeCompare(a.ts||''); });
-      renderStations();
-    },
-    function(err) {
-      setSyncStatus('error','連線錯誤 Error');
-      console.error(err);
-    }
-  );
-}
-
-function flashTicket(fsId) {
-  var el = document.getElementById('ticket-' + fsId);
-  if (el) { el.classList.add('new-flash'); setTimeout(function(){el.classList.remove('new-flash');},700); }
-}
-
-// ─────────────────────────────────────────
 // TABLE BUTTONS
 // ─────────────────────────────────────────
 function buildTableBtns() {
@@ -483,21 +358,21 @@ function buildTableBtns() {
   h+='<button class="tno-btn" onclick="setTable(\'外帶\')">外帶</button>';
   g.innerHTML=h;
 }
-window.setTable = function(val) {
+function setTable(val) {
   currentTable=val;
   document.getElementById('tno-custom').value='';
   document.getElementById('cur-table-display').textContent='枱 '+val;
   var btns=document.getElementById('table-scroll').querySelectorAll('.tno-btn');
   for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on',btns[i].textContent===String(val));
   document.getElementById('table-warn').style.display='none';
-};
-window.setTableCustom = function(val) {
+}
+function setTableCustom(val) {
   currentTable=val.trim();
   var btns=document.getElementById('table-scroll').querySelectorAll('.tno-btn');
   for(var i=0;i<btns.length;i++) btns[i].classList.remove('on');
   document.getElementById('cur-table-display').textContent=currentTable?'枱 '+currentTable:'';
   document.getElementById('table-warn').style.display='none';
-};
+}
 
 // ─────────────────────────────────────────
 // BUILD MENU PANELS
@@ -529,13 +404,13 @@ function buildPanels() {
 // ─────────────────────────────────────────
 // PICK ITEM → MODAL
 // ─────────────────────────────────────────
-window.pickItem = function(idx) {
+function pickItem(idx) {
   if(pausedItems[idx]) return;
   var item=MENU_ITEMS[idx];
-  if(!item.mods||item.mods.length===0){ addToCart(item.st,item.zh,item.en,item.p,'','','',0); return; }
+  if(!item.mods||item.mods.length===0){ addToCart(item.st,item.zh,item.en,item.p,'',[],[],0); return; }
   pendingItem=item; custSel={}; selToppings=[]; selDrinkToppings=[]; selGarnish=[];
   renderModal();
-};
+}
 
 function renderModal() {
   var item=pendingItem;
@@ -634,7 +509,7 @@ function buildToppingSection(sc){
 // ─────────────────────────────────────────
 // TOGGLE HANDLERS
 // ─────────────────────────────────────────
-window.togTop = function(el){
+function togTop(el){
   var name=el.getAttribute('data-top'),isFire=el.getAttribute('data-fire')==='1',isExtra=el.getAttribute('data-xtra')==='1',sc=el.getAttribute('data-sel');
   var isOn=el.classList.contains(sc);
   if(isOn){el.classList.remove('sel-w','sel-f','sel-n');for(var i=0;i<selToppings.length;i++){if(selToppings[i].name===name){selToppings.splice(i,1);break;}}}
@@ -645,30 +520,30 @@ window.togTop = function(el){
   var cnt=selToppings.length,cost=0;
   for(var i=0;i<selToppings.length;i++){if(i>0)cost+=2;if(selToppings[i].isExtra)cost+=2;}
   var el2=document.getElementById('top-status');if(el2){el2.className='topping-status'+(cnt>=5?' over':'');el2.textContent='已選 '+cnt+' / 5 款'+(cost>0?'  額外 +£'+cost:'  首1款包含');}
-};
-window.togDrinkTop = function(el){
+}
+function togDrinkTop(el){
   var name=el.getAttribute('data-dtop'),sc=el.getAttribute('data-sel'),isOn=el.classList.contains(sc);
   if(isOn){el.classList.remove('sel-w','sel-f','sel-n');for(var i=0;i<selDrinkToppings.length;i++){if(selDrinkToppings[i]===name){selDrinkToppings.splice(i,1);break;}}}
   else{el.classList.add(sc);selDrinkToppings.push(name);}
   var cnt=selDrinkToppings.length,cost=Math.max(0,cnt-1)*0.5;
   var el2=document.getElementById('dtop-status');if(el2){el2.textContent=cnt===0?'未選配料':'已選 '+cnt+' 款'+(cost>0?'  額外 +£'+cost.toFixed(2):'  免費換');}
-};
-window.togGarnish = function(el){
+}
+function togGarnish(el){
   var name=el.getAttribute('data-garnish'),gp=parseFloat(el.getAttribute('data-gprice')||'0')||0,sc=el.getAttribute('data-sel'),isOn=el.classList.contains(sc);
   if(isOn){el.classList.remove('sel-w','sel-f','sel-n');for(var i=0;i<selGarnish.length;i++){if(selGarnish[i].label===name){selGarnish.splice(i,1);break;}}}
   else{el.classList.add(sc);selGarnish.push({label:name,price:gp});}
-};
-window.selOpt = function(el){
+}
+function selOpt(el){
   var mk=el.getAttribute('data-key'),val=el.getAttribute('data-val'),sc=el.getAttribute('data-sel'),dp=parseFloat(el.getAttribute('data-drinkprice')||'0')||0;
   var siblings=el.parentElement.querySelectorAll('[data-key="'+mk+'"]');
   for(var i=0;i<siblings.length;i++) siblings[i].classList.remove('sel-w','sel-f','sel-n');
   el.classList.add(sc); custSel[mk]={val:val,drinkPrice:dp};
-};
+}
 
 // ─────────────────────────────────────────
 // CONFIRM MOD
 // ─────────────────────────────────────────
-window.confirmMod = function(){
+function confirmMod(){
   if(!pendingItem) return;
   var modParts=[],extraPrice=0,fireTops=[],waterNotes=[];
   var keys=Object.keys(custSel);
@@ -690,23 +565,23 @@ window.confirmMod = function(){
   if(selGarnish.length>0){var gl=[];for(var i=0;i<selGarnish.length;i++){gl.push(selGarnish[i].label);extraPrice+=selGarnish[i].price;}modParts.push(gl.join(' '));}
   addToCart(pendingItem.st,pendingItem.zh,pendingItem.en,pendingItem.p,modParts.join(' · '),fireTops,waterNotes,extraPrice);
   closeModal();
-};
+}
 
-window.closeModal = function(){
+function closeModal(){
   document.getElementById('modal-overlay').classList.remove('on');
   pendingItem=null;custSel={};selToppings=[];selDrinkToppings=[];selGarnish=[];
-};
-document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)window.closeModal();});
+}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
 // ─────────────────────────────────────────
 // CART
 // ─────────────────────────────────────────
 function addToCart(st,zh,en,p,mods,fireTops,waterNotes,extraP){
-  cart.push({st:st,zh:zh,en:en,p:p+(extraP||0),qty:1,mods:mods,fireTops:Array.isArray(fireTops)?fireTops:[],waterNotes:Array.isArray(waterNotes)?waterNotes:[]});
+  cart.push({st:st,zh:zh,en:en,p:p+(extraP||0),qty:1,mods:mods,fireTops:fireTops||[],waterNotes:waterNotes||[]});
   renderCart();
 }
-window.chgQty = function(idx,d){cart[idx].qty+=d;if(cart[idx].qty<=0)cart.splice(idx,1);renderCart();};
-window.clearCart = function(){cart=[];renderCart();};
+function chgQty(idx,d){cart[idx].qty+=d;if(cart[idx].qty<=0)cart.splice(idx,1);renderCart();}
+function clearCart(){cart=[];renderCart();}
 
 function renderCart(){
   var l=document.getElementById('cart-list'),f=document.getElementById('cart-foot');
@@ -733,141 +608,158 @@ function renderCart(){
 }
 
 // ─────────────────────────────────────────
-// SEND ORDER → FIRESTORE
+// BUILD WHATSAPP MESSAGE TEXT PER STATION
 // ─────────────────────────────────────────
-window.sendOrder = async function(){
-  if(!cart.length) return;
-  if(!currentTable){document.getElementById('table-warn').style.display='block';return;}
-  setSyncStatus('syncing','儲存中…');
-  var rmk=document.getElementById('rmk').value.trim();
-  var tot=0; for(var i=0;i<cart.length;i++) tot+=cart[i].p*cart[i].qty;
-  // Generate order number from current count + 1
-  var no=String(orders.length+1); while(no.length<3) no='0'+no;
-  var byStation={};
-  for(var i=0;i<cart.length;i++){
-    var it=cart[i];
-    if(!byStation[it.st]) byStation[it.st]=[];
-    byStation[it.st].push({zh:it.zh,en:it.en,p:it.p,qty:it.qty,mods:it.mods,fireTops:it.fireTops,waterNotes:it.waterNotes,isTask:false});
-    if(it.st==='noodle'&&it.fireTops&&it.fireTops.length>0){
-      if(!byStation['fire']) byStation['fire']=[];
-      byStation['fire'].push({zh:'🍜→🔥 配料任務',en:'',p:0,qty:it.qty,mods:it.fireTops.join('、'),fireTops:[],waterNotes:[],isTask:true,taskType:'fire'});
-    }
-    if((it.st==='fire'||it.st==='noodle')&&it.waterNotes&&it.waterNotes.length>0){
-      if(!byStation['water']) byStation['water']=[];
-      byStation['water'].push({zh:(it.st==='fire'?'🔥→💧':'🍜→💧')+' 飲品任務',en:'',p:0,qty:it.qty,mods:it.waterNotes.join(' · '),fireTops:[],waterNotes:[],isTask:true,taskType:'water'});
-    }
+function buildStationMessage(st, items, table, no, rmk) {
+  var icon = st==='water'?'💧 水吧':st==='fire'?'🔥 火位':'🍜 麵位';
+  var lines = [];
+  lines.push('🌋 VOLCANO 新訂單 #'+no);
+  lines.push('枱號：'+table);
+  lines.push('崗位：'+icon);
+  lines.push('──────────');
+  for (var i=0;i<items.length;i++){
+    var it = items[i];
+    var line = '• '+it.zh+' ×'+it.qty;
+    if (it.p > 0) line += '  £'+(it.p*it.qty).toFixed(2);
+    lines.push(line);
+    if (it.mods) lines.push('   ('+it.mods+')');
   }
-  var stations=Object.keys(byStation);
-  var now=new Date(),hh=now.getHours(),mm=now.getMinutes();
-  var ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
-  var orderDoc={no:no,table:currentTable,byStation:byStation,tot:tot,rmk:rmk,done:{},stations:stations,ts:ts,createdMs:Date.now()};
-  try{
-    await addDoc(collection(db,'orders'), orderDoc);
-    cart=[]; document.getElementById('rmk').value='';
-    renderCart(); vswitch('station');
-  }catch(e){
-    setSyncStatus('error','儲存失敗 Save failed');
-    console.error(e);
-  }
-};
+  if (rmk) { lines.push('──────────'); lines.push('📝 備注：'+rmk); }
+  return lines.join('\n');
+}
 
-// ─────────────────────────────────────────
-// RENDER STATIONS (from local mirror)
-// ─────────────────────────────────────────
-function renderStations(){
-  var stList=['water','fire','noodle'];
-  for(var s=0;s<stList.length;s++){
-    var st=stList[s],el=document.getElementById('st-'+st),cntEl=document.getElementById('cnt-'+st);
-    var rel=[];
-    for(var i=0;i<orders.length;i++){if(orders[i].byStation&&orders[i].byStation[st])rel.push(orders[i]);}
-    var pending=0;
-    for(var i=0;i<rel.length;i++){var ad=true;for(var j=0;j<rel[i].stations.length;j++){if(!rel[i].done[rel[i].stations[j]]){ad=false;break;}}if(!ad)pending++;}
-    cntEl.textContent=pending;
-    if(!rel.length){el.innerHTML='<div class="no-orders">暫無訂單</div>';continue;}
-    var h='';
-    for(var i=0;i<rel.length;i++){
-      var o=rel[i];
-      var allDone=true;
-      for(var j=0;j<o.stations.length;j++){if(!o.done[o.stations[j]]){allDone=false;break;}}
-      var myDone=!!o.done[st];
-      var items='';
-      var stItems=o.byStation[st];
-      for(var j=0;j<stItems.length;j++){
-        var it=stItems[j];
-        if(it.isTask){
-          var tc=it.taskType==='fire'?'fire-task-row':'water-task-row';
-          var ti2=it.taskType==='fire'?'🔥':'💧';
-          items+='<div class="'+tc+'">'+ti2+' '+it.mods+(it.qty>1?' ×'+it.qty:'')+'</div>';
-        }else{
-          items+='<div class="titem">'+it.zh+' ×'+it.qty+(it.p>0?' <span style="color:var(--text3);font-size:10px">£'+(it.p*it.qty).toFixed(2)+'</span>':'')+
-            '</div>'+(it.mods?'<div class="tmod">'+it.mods+'</div>':'');
-        }
-      }
-      var prog='';
-      for(var j=0;j<o.stations.length;j++){
-        var ss=o.stations[j],oc=ss==='water'?'w-on':ss==='fire'?'f-on':'n-on';
-        var lb=ss==='water'?'💧水吧':ss==='fire'?'🔥火位':'🍜麵位';
-        prog+='<span class="prog '+(o.done[ss]?oc:'off')+'">'+lb+(o.done[ss]?' ✓':' …')+'</span>';
-      }
-      var rmkH=o.rmk?'<div class="trmk">📝 '+o.rmk+'</div>':'';
-      var fsId=o._fsId||'';
-      h+='<div class="ticket '+(allDone?'all-done':'')+'" id="ticket-'+fsId+'">'+
-        (allDone?'<div class="all-badge">✓ 全部完成 All Done</div>':'')+
-        '<div class="ticket-top"><span class="tno">#'+o.no+' · '+o.ts+' · £'+o.tot.toFixed(2)+'</span>'+
-        '<span class="table-tag">枱 '+o.table+'</span></div>'+
-        items+rmkH+
-        '<div class="tprog">'+prog+'</div>'+
-        '<div class="tact">'+
-        '<button class="done-btn '+(myDone?'isdone':'')+'" onclick="toggleDone(\''+o.no+'\',\''+st+'\')">'+(myDone?'✓ 完成 Done':'標示完成 Mark done')+'</button>'+
-        '<button class="del-btn" onclick="delOrder(\''+o.no+'\')">✕</button>'+
-        '</div></div>';
-    }
-    el.innerHTML=h;
-  }
+function buildFireTaskMessage(fireTops, table, no) {
+  var lines=[];
+  lines.push('🌋 VOLCANO 配料任務 #'+no);
+  lines.push('枱號：'+table);
+  lines.push('🔥 火位需處理（麵位配料）：');
+  lines.push('• '+fireTops.join('、'));
+  return lines.join('\n');
+}
+
+function buildWaterTaskMessage(waterNotes, table, no, fromSt) {
+  var lines=[];
+  lines.push('🌋 VOLCANO 飲品任務 #'+no);
+  lines.push('枱號：'+table);
+  lines.push('💧 水吧需處理（'+(fromSt==='fire'?'火位套餐':'麵位追加')+'飲品）：');
+  lines.push('• '+waterNotes.join(' · '));
+  return lines.join('\n');
+}
+
+function openWA(number, text) {
+  var url = 'https://wa.me/'+number+'?text='+encodeURIComponent(text);
+  window.open(url, '_blank');
 }
 
 // ─────────────────────────────────────────
-// TOGGLE DONE / DELETE → FIRESTORE
+// SEND ORDER → OPEN WHATSAPP WINDOWS
 // ─────────────────────────────────────────
-window.toggleDone = async function(no,st){
-  var o=null;
-  for(var i=0;i<orders.length;i++){if(orders[i].no===no){o=orders[i];break;}}
-  if(!o||!o._fsId) return;
-  var newDone=Object.assign({},o.done);
-  newDone[st]=!newDone[st];
-  try{ await updateDoc(doc(db,'orders',o._fsId),{done:newDone}); }catch(e){console.error(e);}
-};
+function sendOrder(){
+  if(!cart.length) return;
+  if(!currentTable){document.getElementById('table-warn').style.display='block';return;}
+  var rmk=document.getElementById('rmk').value.trim();
+  var tot=0; for(var i=0;i<cart.length;i++) tot+=cart[i].p*cart[i].qty;
+  var no=String(oNo++); while(no.length<3) no='0'+no;
 
-window.delOrder = async function(no){
-  var fsId=firestoreIds[no];
-  if(!fsId) return;
-  try{ await deleteDoc(doc(db,'orders',fsId)); }catch(e){console.error(e);}
-};
+  var byStation={};
+  var fireTaskTops=[];
+  var waterTaskNotes=[];
+
+  for(var i=0;i<cart.length;i++){
+    var it=cart[i];
+    if(!byStation[it.st]) byStation[it.st]=[];
+    byStation[it.st].push({zh:it.zh,en:it.en,p:it.p,qty:it.qty,mods:it.mods});
+    if(it.st==='noodle'&&it.fireTops&&it.fireTops.length>0){
+      fireTaskTops = fireTaskTops.concat(it.fireTops);
+    }
+    if((it.st==='fire'||it.st==='noodle')&&it.waterNotes&&it.waterNotes.length>0){
+      waterTaskNotes.push({notes:it.waterNotes,from:it.st});
+    }
+  }
+
+  var stationsUsed = Object.keys(byStation);
+
+  // Open WhatsApp window for each station that has items
+  var delay = 0;
+  stationsUsed.forEach(function(st){
+    setTimeout(function(){
+      var msg = buildStationMessage(st, byStation[st], currentTable, no, rmk);
+      openWA(WA_NUMBERS[st], msg);
+    }, delay);
+    delay += 600;
+  });
+
+  // Fire task (noodle topping → fire station)
+  if (fireTaskTops.length > 0) {
+    setTimeout(function(){
+      var msg = buildFireTaskMessage(fireTaskTops, currentTable, no);
+      openWA(WA_NUMBERS.fire, msg);
+    }, delay);
+    delay += 600;
+  }
+
+  // Water task (fire/noodle drink → water bar)
+  for (var i=0;i<waterTaskNotes.length;i++){
+    (function(wt, d){
+      setTimeout(function(){
+        var msg = buildWaterTaskMessage(wt.notes, currentTable, no, wt.from);
+        openWA(WA_NUMBERS.water, msg);
+      }, d);
+    })(waterTaskNotes[i], delay);
+    delay += 600;
+  }
+
+  // Save to history
+  orderHistory.unshift({no:no, table:currentTable, items:cart.slice(), tot:tot, rmk:rmk, ts:new Date().toLocaleTimeString('zh-HK',{hour:'2-digit',minute:'2-digit'})});
+  saveHistory();
+  renderHistory();
+
+  cart=[];
+  document.getElementById('rmk').value='';
+  renderCart();
+}
 
 // ─────────────────────────────────────────
-// MANAGE / PAUSE (stored in localStorage — local per device)
+// HISTORY VIEW
 // ─────────────────────────────────────────
-window.openManage = function(){
+function renderHistory(){
+  var el = document.getElementById('history-body');
+  if (!orderHistory.length) { el.innerHTML='<div class="no-orders">暫無歷史訂單</div>'; return; }
+  var h='';
+  for (var i=0;i<orderHistory.length;i++){
+    var o=orderHistory[i];
+    var itemsTxt = o.items.map(function(it){return it.zh+'×'+it.qty;}).join('、');
+    h+='<div class="history-card">'+
+      '<div class="history-top"><span class="history-table">枱 '+o.table+'</span><span class="history-time">#'+o.no+' · '+o.ts+'</span></div>'+
+      '<div class="history-items">'+itemsTxt+'</div>'+
+      '<div class="history-tot" style="margin-top:6px">£'+o.tot.toFixed(2)+'</div>'+
+      '</div>';
+  }
+  el.innerHTML=h;
+}
+
+function saveHistory(){
+  try{ localStorage.setItem('volcano_history', JSON.stringify({history:orderHistory,oNo:oNo})); }catch(e){}
+}
+function loadHistory(){
+  try{ var r=localStorage.getItem('volcano_history'); if(r){var d=JSON.parse(r); if(d.history){orderHistory=d.history;oNo=d.oNo||1;}} }catch(e){}
+}
+
+// ─────────────────────────────────────────
+// MANAGE / PAUSE + WHATSAPP NUMBERS DISPLAY
+// ─────────────────────────────────────────
+function openManage(){
   var stNames={water:'💧 水吧',fire:'🔥 火位',noodle:'🍜 麵位'};
   var stKeys=['water','fire','noodle'];
-  // Summary stats
-  var totalSales=0, totalOrders=orders.length;
-  for(var i=0;i<orders.length;i++) totalSales+=orders[i].tot||0;
-  var h='<div class="modal-handle"></div><div class="modal-title" style="margin-bottom:6px">管理 Manage</div>';
-  // Sales summary
-  h+='<div style="background:var(--noodle-bg);border-radius:10px;padding:10px 12px;margin-bottom:12px">'+
-    '<div style="font-size:11px;color:var(--noodle-t);font-weight:700;margin-bottom:4px">今日訂單 Today\'s Orders</div>'+
-    '<div style="display:flex;gap:16px">'+
-    '<div><div style="font-size:20px;font-weight:700;color:var(--text)">'+totalOrders+'</div><div style="font-size:10px;color:var(--text3)">訂單數</div></div>'+
-    '<div><div style="font-size:20px;font-weight:700;color:var(--text)">£'+totalSales.toFixed(2)+'</div><div style="font-size:10px;color:var(--text3)">總銷售額</div></div>'+
-    '</div></div>';
-  // Action buttons
-  h+='<div style="display:flex;gap:8px;margin-bottom:14px">'+
-    '<button onclick="downloadCSV()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--noodle);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📥 下載訂單 CSV</button>'+
-    '<button onclick="clearAllOrders()" style="flex:1;padding:10px;border:1px solid #c0392b;border-radius:10px;background:transparent;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑 清除所有單</button>'+
-    '</div>';
-  // Pause items
-  h+='<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">暫停菜式 Pause Items</div>';
+  var h='<div class="modal-handle"></div><div class="modal-title" style="margin-bottom:10px">管理 Manage</div>';
+
+  h+='<div class="wa-info">📲 訂單會自動打開 WhatsApp 發送俾以下號碼</div>';
+  for(var s=0;s<stKeys.length;s++){
+    var st=stKeys[s];
+    h+='<div class="wa-row"><span class="wa-station">'+stNames[st]+'</span><span class="wa-num">+'+WA_NUMBERS[st]+'</span></div>';
+  }
+
+  h+='<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">暫停菜式 Pause Items</div>';
   for(var s=0;s<stKeys.length;s++){
     var st=stKeys[s];
     h+='<div class="manage-sec">'+stNames[st]+'</div>';
@@ -882,88 +774,53 @@ window.openManage = function(){
   h+='<div style="margin-top:16px"><button onclick="closeManage()" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--text);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">關閉 Close</button></div>';
   document.getElementById('manage-sheet').innerHTML=h;
   document.getElementById('manage-overlay').classList.add('on');
-};
-
-window.downloadCSV = function(){
-  if(!orders.length){ alert('暫無訂單資料'); return; }
-  var rows=[['單號','枱號','時間','合計(£)','備注','項目詳情']];
-  for(var i=0;i<orders.length;i++){
-    var o=orders[i];
-    var items=[];
-    var stKeys2=Object.keys(o.byStation||{});
-    for(var j=0;j<stKeys2.length;j++){
-      var stItems=o.byStation[stKeys2[j]];
-      for(var k=0;k<stItems.length;k++){
-        var it=stItems[k];
-        if(!it.isTask) items.push(it.zh+'×'+it.qty+(it.mods?' ('+it.mods+')':''));
-      }
-    }
-    rows.push([
-      o.no||'',
-      o.table||'',
-      o.ts||'',
-      (o.tot||0).toFixed(2),
-      o.rmk||'',
-      '"'+items.join(' | ')+'"'
-    ]);
-  }
-  // Add summary row
-  var totalS=0; for(var i=0;i<orders.length;i++) totalS+=orders[i].tot||0;
-  rows.push(['','','合計 TOTAL','£'+totalS.toFixed(2),'','']);
-  var csv=rows.map(function(r){return r.join(',');}).join('\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  var today=new Date();
-  var dateStr=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-  a.href=url; a.download='VOLCANO_orders_'+dateStr+'.csv';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-};
-
-window.clearAllOrders = async function(){
-  if(!confirm('確認清除所有訂單？此操作不可還原！\nConfirm clear ALL orders? Cannot be undone!')) return;
-  closeManage();
-  setSyncStatus('syncing','清除中…');
-  try{
-    var snap=await getDocs(collection(db,'orders'));
-    var dels=[];
-    snap.forEach(function(d){ dels.push(deleteDoc(doc(db,'orders',d.id))); });
-    await Promise.all(dels);
-    setSyncStatus('connected','即時同步 Live ✓');
-  }catch(e){ setSyncStatus('error','清除失敗'); console.error(e); }
-};
-window.closeManage = function(){ document.getElementById('manage-overlay').classList.remove('on'); };
-window.togglePause = function(idx){
+}
+function closeManage(){ document.getElementById('manage-overlay').classList.remove('on'); }
+function togglePause(idx){
   pausedItems[idx]=!pausedItems[idx];
   try{localStorage.setItem('volcano_paused',JSON.stringify(pausedItems));}catch(e){}
-  buildPanels(); window.openManage();
-};
-document.getElementById('manage-overlay').addEventListener('click',function(e){if(e.target===this)window.closeManage();});
+  buildPanels(); openManage();
+}
+document.getElementById('manage-overlay').addEventListener('click',function(e){if(e.target===this)closeManage();});
 
 // ─────────────────────────────────────────
 // SWITCH
 // ─────────────────────────────────────────
-window.stabSwitch = function(t){
+function stabSwitch(t){
   var tabs=['water','fire','noodle'];
   for(var i=0;i<tabs.length;i++){var x=tabs[i];document.getElementById('p-'+x).classList[x===t?'add':'remove']('on');document.getElementById('tb-'+x).className='stab'+(x===t?' on-'+x:'');}
-};
-window.vswitch = function(v){
+}
+function vswitch(v){
   document.getElementById('view-order').classList[v==='order'?'add':'remove']('on');
-  document.getElementById('view-station').classList[v==='station'?'add':'remove']('on');
+  document.getElementById('view-history').classList[v==='history'?'add':'remove']('on');
   document.getElementById('vv-order').classList[v==='order'?'add':'remove']('on');
-  document.getElementById('vv-station').classList[v==='station'?'add':'remove']('on');
-  if(v==='station') renderStations();
-};
+  document.getElementById('vv-history').classList[v==='history'?'add':'remove']('on');
+  if(v==='history') renderHistory();
+}
 
 // ─────────────────────────────────────────
-// INIT
+// INIT (wrapped in try-catch for safety + visible error display)
 // ─────────────────────────────────────────
-try{var pp=localStorage.getItem('volcano_paused');if(pp)pausedItems=JSON.parse(pp);}catch(e){}
-buildTableBtns();
-buildPanels();
-startListener();
+function showFatalError(msg) {
+  var el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;padding:12px;font-size:12px;z-index:9999;font-family:monospace;white-space:pre-wrap;';
+  el.textContent = '⚠️ 載入錯誤 Load Error:\n' + msg;
+  document.body.appendChild(el);
+}
 
+try {
+  try{var pp=localStorage.getItem('volcano_paused');if(pp)pausedItems=JSON.parse(pp);}catch(e){}
+  loadHistory();
+  buildTableBtns();
+  buildPanels();
+  renderHistory();
+} catch(initErr) {
+  showFatalError(initErr.message + '\n' + (initErr.stack||''));
+}
+
+window.addEventListener('error', function(e){
+  showFatalError(e.message + ' (line ' + e.lineno + ')');
+});
 </script>
 </body>
 </html>

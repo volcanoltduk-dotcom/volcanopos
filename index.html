@@ -179,7 +179,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
               <span class="total-lbl">合計 Total</span>
               <span class="total-amt" id="tot">£0.00</span>
             </div>
-            <button class="send-btn" onclick="sendOrder()">📲 落單並發送到 WhatsApp</button>
+            <button class="send-btn" onclick="sendOrder()">📲 落單（複製內容＋開 WhatsApp 群組）</button>
           </div>
         </div>
       </div>
@@ -206,14 +206,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 <script>
 // ─────────────────────────────────────────
-// WHATSAPP NUMBERS (no + or spaces, country code first)
+// WHATSAPP GROUP LINK (single group for all stations)
 // ─────────────────────────────────────────
-var WA_NUMBERS = {
-  water:  '447709386533',
-  fire:   '85260196700',
-  noodle: '447719388736'
-};
-var WA_LABELS = { water:'💧 水吧', fire:'🔥 火位', noodle:'🍜 麵位' };
+var WA_GROUP_LINK = 'https://chat.whatsapp.com/Jyx1y0mjxYgCJG0OlgPiSU?s=cl&p=i&mlu=2';
 
 var MENU_ITEMS = [];
 var cart = [];
@@ -335,7 +330,12 @@ var MENU = {
       {zh:'西多士',en:'HK French Toast',p:4,mods:['toast']},
       {zh:'薯片',en:'Seasoned Crisps',p:1.5,mods:[]},
       {zh:'白飯',en:'Steamed Rice',p:2,mods:[]},
-      {zh:'脆麵/乾撈麵',en:'Crispy / Dried Noodle',p:3,mods:['noodle_plain']}
+      {zh:'脆麵/乾撈麵',en:'Crispy / Dried Noodle',p:3,mods:['noodle_plain']},
+      {zh:'鹵水雞翼 (5隻)',en:'5pcs Braised Chicken Wings',p:5,mods:[]},
+      {zh:'鹵水雞翼 (10隻)',en:'10pcs Braised Chicken Wings',p:8.8,mods:[]},
+      {zh:'土匪雞翼 (5隻)',en:'5pcs Bandit Chicken Wings',p:5,mods:[]},
+      {zh:'土匪雞翼 (10隻)',en:'10pcs Bandit Chicken Wings',p:8.8,mods:[]},
+      {zh:'炸魷魚鬚',en:'Deep Fried Squid Tentacles',p:8.8,mods:[]}
     ]}
   ]},
   noodle:{sections:[
@@ -344,6 +344,12 @@ var MENU = {
       {zh:'酸辣湯米線',en:'Hot & Sour Soup',p:8.8,mods:['spice','TOPPINGS','GARNISH','NOODLE_DRINK']},
       {zh:'麻辣湯米線',en:'Mala Soup',p:8.8,mods:['spice','TOPPINGS','GARNISH','NOODLE_DRINK']},
       {zh:'酸麻辣湯米線',en:'Hot & Sour Mala Soup',p:8.8,mods:['spice','TOPPINGS','GARNISH','NOODLE_DRINK']}
+    ]},
+    {t:'小食 Snacks',items:[
+      {zh:'湯丸 - 花生 (5粒)',en:'5pcs Tangyuan - Peanut',p:4,mods:[]},
+      {zh:'湯丸 - 紅豆 (5粒)',en:'5pcs Tangyuan - Red Bean',p:4,mods:[]},
+      {zh:'湯丸 - 芝麻 (5粒)',en:'5pcs Tangyuan - Black Sesame',p:4,mods:[]},
+      {zh:'雲吞湯 (5粒)',en:'5pcs Wonton Soup',p:5,mods:[]}
     ]}
   ]}
 };
@@ -608,51 +614,67 @@ function renderCart(){
 }
 
 // ─────────────────────────────────────────
-// BUILD WHATSAPP MESSAGE TEXT PER STATION
+// BUILD ONE COMBINED WHATSAPP MESSAGE FOR THE WHOLE ORDER
 // ─────────────────────────────────────────
-function buildStationMessage(st, items, table, no, rmk) {
-  var icon = st==='water'?'💧 水吧':st==='fire'?'🔥 火位':'🍜 麵位';
+function buildFullOrderMessage(byStation, fireTaskTops, waterTaskNotes, table, no, rmk, tot) {
   var lines = [];
-  lines.push('🌋 VOLCANO 新訂單 #'+no);
-  lines.push('枱號：'+table);
-  lines.push('崗位：'+icon);
-  lines.push('──────────');
-  for (var i=0;i<items.length;i++){
-    var it = items[i];
-    var line = '• '+it.zh+' ×'+it.qty;
-    if (it.p > 0) line += '  £'+(it.p*it.qty).toFixed(2);
-    lines.push(line);
-    if (it.mods) lines.push('   ('+it.mods+')');
+  lines.push('🌋 VOLCANO 新訂單 #'+no+'　枱 '+table);
+  lines.push('══════════');
+
+  var stOrder = ['water','fire','noodle'];
+  var stIcon = {water:'💧 水吧',fire:'🔥 火位',noodle:'🍜 麵位'};
+  for (var s=0;s<stOrder.length;s++){
+    var st=stOrder[s];
+    if (!byStation[st] || !byStation[st].length) continue;
+    lines.push(stIcon[st]+'：');
+    for (var i=0;i<byStation[st].length;i++){
+      var it=byStation[st][i];
+      var line='• '+it.zh+' ×'+it.qty;
+      if (it.p>0) line+='  £'+(it.p*it.qty).toFixed(2);
+      lines.push(line);
+      if (it.mods) lines.push('   ('+it.mods+')');
+    }
+    lines.push('');
   }
-  if (rmk) { lines.push('──────────'); lines.push('📝 備注：'+rmk); }
+
+  if (fireTaskTops.length>0){
+    lines.push('🔥 火位需處理（麵位配料）：');
+    lines.push('• '+fireTaskTops.join('、'));
+    lines.push('');
+  }
+
+  if (waterTaskNotes.length>0){
+    lines.push('💧 水吧需處理（飲品要求）：');
+    for (var i=0;i<waterTaskNotes.length;i++){
+      lines.push('• ('+(waterTaskNotes[i].from==='fire'?'火位套餐':'麵位追加')+') '+waterTaskNotes[i].notes.join(' · '));
+    }
+    lines.push('');
+  }
+
+  if (rmk) { lines.push('📝 備注：'+rmk); lines.push(''); }
+  lines.push('══════════');
+  lines.push('合計 Total：£'+tot.toFixed(2));
   return lines.join('\n');
 }
 
-function buildFireTaskMessage(fireTops, table, no) {
-  var lines=[];
-  lines.push('🌋 VOLCANO 配料任務 #'+no);
-  lines.push('枱號：'+table);
-  lines.push('🔥 火位需處理（麵位配料）：');
-  lines.push('• '+fireTops.join('、'));
-  return lines.join('\n');
-}
-
-function buildWaterTaskMessage(waterNotes, table, no, fromSt) {
-  var lines=[];
-  lines.push('🌋 VOLCANO 飲品任務 #'+no);
-  lines.push('枱號：'+table);
-  lines.push('💧 水吧需處理（'+(fromSt==='fire'?'火位套餐':'麵位追加')+'飲品）：');
-  lines.push('• '+waterNotes.join(' · '));
-  return lines.join('\n');
-}
-
-function openWA(number, text) {
-  var url = 'https://wa.me/'+number+'?text='+encodeURIComponent(text);
-  window.open(url, '_blank');
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  // fallback
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); } catch(e){}
+  document.body.removeChild(ta);
+  return Promise.resolve();
 }
 
 // ─────────────────────────────────────────
-// SEND ORDER → OPEN WHATSAPP WINDOWS
+// SEND ORDER → COPY TEXT + OPEN WHATSAPP GROUP
 // ─────────────────────────────────────────
 function sendOrder(){
   if(!cart.length) return;
@@ -677,37 +699,20 @@ function sendOrder(){
     }
   }
 
-  var stationsUsed = Object.keys(byStation);
+  var fullMsg = buildFullOrderMessage(byStation, fireTaskTops, waterTaskNotes, currentTable, no, rmk, tot);
 
-  // Open WhatsApp window for each station that has items
-  var delay = 0;
-  stationsUsed.forEach(function(st){
+  // Copy to clipboard then open the group
+  copyToClipboard(fullMsg).then(function(){
+    showCopyToast();
     setTimeout(function(){
-      var msg = buildStationMessage(st, byStation[st], currentTable, no, rmk);
-      openWA(WA_NUMBERS[st], msg);
-    }, delay);
-    delay += 600;
+      window.open(WA_GROUP_LINK, '_blank');
+    }, 400);
+  }).catch(function(){
+    // Even if copy fails, still open the group
+    setTimeout(function(){
+      window.open(WA_GROUP_LINK, '_blank');
+    }, 200);
   });
-
-  // Fire task (noodle topping → fire station)
-  if (fireTaskTops.length > 0) {
-    setTimeout(function(){
-      var msg = buildFireTaskMessage(fireTaskTops, currentTable, no);
-      openWA(WA_NUMBERS.fire, msg);
-    }, delay);
-    delay += 600;
-  }
-
-  // Water task (fire/noodle drink → water bar)
-  for (var i=0;i<waterTaskNotes.length;i++){
-    (function(wt, d){
-      setTimeout(function(){
-        var msg = buildWaterTaskMessage(wt.notes, currentTable, no, wt.from);
-        openWA(WA_NUMBERS.water, msg);
-      }, d);
-    })(waterTaskNotes[i], delay);
-    delay += 600;
-  }
 
   // Save to history
   orderHistory.unshift({no:no, table:currentTable, items:cart.slice(), tot:tot, rmk:rmk, ts:new Date().toLocaleTimeString('zh-HK',{hour:'2-digit',minute:'2-digit'})});
@@ -717,6 +722,14 @@ function sendOrder(){
   cart=[];
   document.getElementById('rmk').value='';
   renderCart();
+}
+
+function showCopyToast(){
+  var el = document.createElement('div');
+  el.textContent = '✅ 已複製訂單內容！打開 WhatsApp 後請長按輸入欄「貼上」';
+  el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#25D366;color:#fff;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+  document.body.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 3500);
 }
 
 // ─────────────────────────────────────────
@@ -753,11 +766,8 @@ function openManage(){
   var stKeys=['water','fire','noodle'];
   var h='<div class="modal-handle"></div><div class="modal-title" style="margin-bottom:10px">管理 Manage</div>';
 
-  h+='<div class="wa-info">📲 訂單會自動打開 WhatsApp 發送俾以下號碼</div>';
-  for(var s=0;s<stKeys.length;s++){
-    var st=stKeys[s];
-    h+='<div class="wa-row"><span class="wa-station">'+stNames[st]+'</span><span class="wa-num">+'+WA_NUMBERS[st]+'</span></div>';
-  }
+  h+='<div class="wa-info">📲 訂單會複製到剪貼簿，並打開以下 WhatsApp 群組（請手動貼上發送）</div>';
+  h+='<div class="wa-row"><span class="wa-station">🌋 訂單群組</span><span class="wa-num" style="font-size:10px;word-break:break-all">'+WA_GROUP_LINK+'</span></div>';
 
   h+='<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">暫停菜式 Pause Items</div>';
   for(var s=0;s<stKeys.length;s++){

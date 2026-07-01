@@ -614,47 +614,239 @@ function renderCart(){
 }
 
 // ─────────────────────────────────────────
-// BUILD ONE COMBINED WHATSAPP MESSAGE FOR THE WHOLE ORDER
+// SHORT NAME TABLE (簡稱表)
 // ─────────────────────────────────────────
-function buildFullOrderMessage(byStation, fireTaskTops, waterTaskNotes, table, no, rmk, tot) {
-  var lines = [];
-  lines.push('🌋 VOLCANO 新訂單 #'+no+'　枱 '+table);
-  lines.push('══════════');
+var SHORT_NAMES = {
+  // 米線
+  '清湯米線':'清湯米線','酸辣湯米線':'酸辣米線','麻辣湯米線':'麻辣米線','酸麻辣湯米線':'酸麻米線',
+  // 配料
+  '招牌火山牛丸':'牛丸','鮮蝦雞肉雲吞':'雲吞','魚豆腐':'魚豆腐','魚蛋':'魚蛋',
+  '墨魚丸':'墨魚丸','流心牛丸':'流心丸','肥牛':'肥牛','魚春卷':'魚春卷',
+  '炸魚春卷':'炸魚春卷','豆卜':'豆卜','腐皮':'腐皮','芽菜':'芽菜','酸菜':'酸菜',
+  '牛串燒':'牛串','雞串燒':'雞串','土匪雞翼':'雞翼','鹵水豆腐':'鹵豆腐',
+  '鹵水雞翼':'鹵雞翼','鹵水蛋':'鹵蛋','五香牛腩':'牛腩','五香牛展':'牛展',
+  // 飲品
+  '台式珍珠奶茶':'珍奶','黑糖珍珠奶茶':'黑糖珍奶','朱古力珍珠奶茶':'朱古力珍奶',
+  '椰奶紅豆奶茶':'椰紅豆奶','芋泥奶茶':'芋泥奶','芒果果茶':'芒果茶',
+  '荔枝果茶':'荔枝茶','青蘋果果茶':'青蘋茶','白桃果茶':'白桃茶','檸檬果茶':'檸檬茶',
+  '黑茶芝士':'黑茶芝士','茉莉芝士':'茉莉芝士','抹茶拿鐵':'抹茶拿鐵',
+  '台式珍珠奶茶 +£2':'珍奶','黑糖珍珠奶茶 +£2':'黑糖珍奶','朱古力珍珠奶茶 +£2':'朱古力珍奶',
+  '椰奶紅豆奶茶 +£2':'椰紅豆奶','芋泥奶茶 +£2':'芋泥奶','芒果果茶 +£2':'芒果茶',
+  '荔枝果茶 +£2':'荔枝茶','青蘋果果茶 +£2':'青蘋茶','白桃果茶 +£2':'白桃茶',
+  '檸檬果茶 +£2':'檸檬茶','黑茶芝士 +£2':'黑茶芝士','茉莉芝士 +£2':'茉莉芝士',
+  '抹茶拿鐵 +£3':'抹茶拿鐵','抹茶拿鐵 +£1':'抹茶拿鐵','罐裝飲品':'罐裝','罐裝飲品 +£1':'罐裝',
+  // 套餐
+  'Set A 雞串燒套餐':'Set A','Set B 牛串燒套餐':'Set B','Set C 照燒豆腐套餐':'Set C',
+  'Set D 脆炸雞套餐':'Set D','Set E 牛丸雲吞套餐':'Set E','Set F 西多士套餐':'Set F',
+  // 小食
+  '雞串燒 (3串)':'雞串×3','牛串燒 (3串)':'牛串×3','脆炸雞 (3件)':'炸雞×3',
+  '牛肉丸 (6粒)':'牛丸×6','炸雲吞 (6隻)':'炸雲吞×6','炸豆腐 (6件)':'炸豆腐×6',
+  '西多士':'西多士','薯片':'薯片','白飯':'白飯','脆麵/乾撈麵':'脆麵',
+  '鹵水雞翼 (5隻)':'鹵雞翼×5','鹵水雞翼 (10隻)':'鹵雞翼×10',
+  '土匪雞翼 (5隻)':'雞翼×5','土匪雞翼 (10隻)':'雞翼×10',
+  '炸魷魚鬚':'魷魚鬚',
+  '湯丸 - 花生 (5粒)':'花生湯丸','湯丸 - 紅豆 (5粒)':'紅豆湯丸','湯丸 - 芝麻 (5粒)':'芝麻湯丸',
+  '雲吞湯 (5粒)':'雲吞湯'
+};
 
-  var stOrder = ['water','fire','noodle'];
-  var stIcon = {water:'💧 水吧',fire:'🔥 火位',noodle:'🍜 麵位'};
-  for (var s=0;s<stOrder.length;s++){
-    var st=stOrder[s];
-    if (!byStation[st] || !byStation[st].length) continue;
-    lines.push(stIcon[st]+'：');
-    for (var i=0;i<byStation[st].length;i++){
-      var it=byStation[st][i];
-      var line='• '+it.zh+' ×'+it.qty;
-      if (it.p>0) line+='  £'+(it.p*it.qty).toFixed(2);
-      lines.push(line);
-      if (it.mods) lines.push('   ('+it.mods+')');
+function shorten(name) {
+  return SHORT_NAMES[name] || name;
+}
+
+// Sugar → short label
+var SUGAR_SHORT = {'多糖':'多糖','正常':'正常糖','半糖':'半糖','少糖':'少糖','無糖':'無糖'};
+// Ice → short label
+var ICE_SHORT = {'多冰':'多冰','正常':'正常冰','少冰':'少冰','走冰':'無冰'};
+// Spice → emoji
+var SPICE_EMOJI = {'小辣 Mild':'🌶️Mild','中辣 Medium':'🌶️🌶️Med','大辣 Hot':'🌶️🌶️🌶️Hot'};
+
+// Extract key parts from a mods string
+function parseMods(modsStr) {
+  if (!modsStr) return {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:''};
+  var result = {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:''};
+  var parts = modsStr.split(' · ');
+  for (var i=0;i<parts.length;i++) {
+    var p = parts[i].trim();
+    // Spice
+    if (p.indexOf('Mild')>-1||p.indexOf('Med')>-1||p.indexOf('Hot')>-1||p.indexOf('辣')>-1) {
+      result.spice = SPICE_EMOJI[p] || p;
     }
-    lines.push('');
-  }
-
-  if (fireTaskTops.length>0){
-    lines.push('🔥 火位需處理（麵位配料）：');
-    lines.push('• '+fireTaskTops.join('、'));
-    lines.push('');
-  }
-
-  if (waterTaskNotes.length>0){
-    lines.push('💧 水吧需處理（飲品要求）：');
-    for (var i=0;i<waterTaskNotes.length;i++){
-      lines.push('• ('+(waterTaskNotes[i].from==='fire'?'火位套餐':'麵位追加')+') '+waterTaskNotes[i].notes.join(' · '));
+    // Sugar
+    else if (SUGAR_SHORT[p]) { result.sugar = SUGAR_SHORT[p]; }
+    // Ice
+    else if (ICE_SHORT[p]) { result.ice = ICE_SHORT[p]; }
+    // Milk
+    else if (p.indexOf('Oat')>-1) { result.milk = '燕麥'; }
+    // Size upgrade
+    else if (p.indexOf('700ml')>-1) { result.size = '大杯'; }
+    // Toppings line
+    else if (p.indexOf('配料：')===0) {
+      var topStr = p.replace('配料：','');
+      result.tops = topStr.split('、').map(function(t){return shorten(t.trim());});
     }
-    lines.push('');
+    // Garnish
+    else if (p==='多葱'||p==='走葱'||p==='多芫茜'||p==='走芫茜'||p==='走芽菜'||p==='走腐皮'||p.indexOf('加底')>-1) {
+      result.garnish.push(p.indexOf('+')>-1?'加底':p);
+    }
+    // Drink
+    else if (p.indexOf('珍奶')>-1||p.indexOf('茶')>-1||p.indexOf('拿鐵')>-1||p.indexOf('罐裝')>-1||SHORT_NAMES[p]||p.indexOf('不加')===0) {
+      if (p!=='不加') result.drink = shorten(p);
+    }
+    // Noodle type
+    else if (p==='脆麵+咖喱'||p==='乾撈麵+蠔油') { result.drink = p; }
+    // Toast filling
+    else if (p.indexOf('Peanut')>-1||p.indexOf('Hazelnut')>-1||p.indexOf('Pistachio')>-1||p.indexOf('Cheese')>-1) {
+      result.drink = p.split(' ')[0];
+    }
+    // Side
+    else if (p==='白飯 Rice'||p==='薯條 Chips') { result.size = (p==='白飯 Rice'?'白飯':'薯條'); }
+    // Sauce
+    else if (p.indexOf('Curry')>-1) { result.sugar = '咖喱'; }
+    else if (p.indexOf('Teriyaki')>-1) { result.sugar = '照燒'; }
+  }
+  return result;
+}
+
+// Format one drink line: 黑糖珍奶｜少糖｜少冰｜燕麥
+function formatDrinkLine(drinkName, m) {
+  var parts = [shorten(drinkName)];
+  if (m.size && m.size!=='白飯'&&m.size!=='薯條') parts.push(m.size);
+  if (m.sugar) parts.push(m.sugar);
+  if (m.ice) parts.push(m.ice);
+  if (m.milk) parts.push(m.milk);
+  return parts.join('｜');
+}
+
+// ─────────────────────────────────────────
+// BUILD SMART STATION MESSAGES
+// ─────────────────────────────────────────
+function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, rmk, tot) {
+  var now = new Date();
+  var hh=now.getHours(),mm=now.getMinutes();
+  var ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+  var header = '🌋 #'+no+'  枱'+table+'  '+ts;
+  var divider = '─────────';
+
+  // ── 🔥 FIRE STATION ──
+  var fireLines = [header, '🔥 火位', divider];
+  if (byStation['fire'] && byStation['fire'].length) {
+    for (var i=0;i<byStation['fire'].length;i++){
+      var it=byStation['fire'][i];
+      var m=parseMods(it.mods);
+      var name=shorten(it.zh);
+      var qty=it.qty>1?'×'+it.qty:'';
+      var line=name+qty;
+      if(m.size&&(m.size==='白飯'||m.size==='薯條')) line+='  '+m.size;
+      if(m.sugar&&(m.sugar==='咖喱'||m.sugar==='照燒')) line+='  '+m.sugar;
+      fireLines.push(line);
+    }
+  }
+  // Fire tasks from noodle toppings
+  if (fireTaskTops.length>0) {
+    var merged={};
+    for(var i=0;i<fireTaskTops.length;i++){var s=shorten(fireTaskTops[i]);merged[s]=(merged[s]||0)+1;}
+    var topStr=Object.keys(merged).map(function(k){return k+(merged[k]>1?'×'+merged[k]:'');}).join('  ');
+    fireLines.push('配：'+topStr);
+  }
+  if (rmk) fireLines.push('📝 '+rmk);
+  fireLines.push('─────────');
+
+  // ── 🍜 NOODLE STATION ──
+  var noodleLines = [header, '🍜 麵位', divider];
+  if (byStation['noodle'] && byStation['noodle'].length) {
+    for (var i=0;i<byStation['noodle'].length;i++){
+      var it=byStation['noodle'][i];
+      var m=parseMods(it.mods);
+      var name=shorten(it.zh);
+      var qty=it.qty>1?'×'+it.qty:'';
+      // Spice
+      var spicePart=m.spice?' '+m.spice:'';
+      noodleLines.push(name+qty+spicePart);
+      // Toppings
+      if(m.tops.length>0){
+        var merged={};
+        for(var j=0;j<m.tops.length;j++){merged[m.tops[j]]=(merged[m.tops[j]]||0)+1;}
+        var topStr=Object.keys(merged).map(function(k){return k+(merged[k]>1?'×'+merged[k]:'');}).join('  ');
+        noodleLines.push('配：'+topStr);
+      }
+      // Garnish / walk
+      if(m.garnish.length>0){
+        var walks=m.garnish.filter(function(g){return g.indexOf('走')===0;});
+        var adds=m.garnish.filter(function(g){return g.indexOf('走')!==0&&g!=='加底';});
+        var extra=m.garnish.filter(function(g){return g==='加底';});
+        if(walks.length>0) noodleLines.push('❌ '+walks.map(function(g){return g.replace('走','');}).join(' '));
+        if(adds.length>0) noodleLines.push('➕ '+adds.join(' '));
+        if(extra.length>0) noodleLines.push('加底');
+      }
+    }
+    // Noodle snacks
+    var snacks=['湯丸 - 花生 (5粒)','湯丸 - 紅豆 (5粒)','湯丸 - 芝麻 (5粒)','雲吞湯 (5粒)'];
+  }
+  if (rmk) noodleLines.push('📝 '+rmk);
+  noodleLines.push('─────────');
+
+  // ── 🥤 WATER BAR ──
+  var waterLines = [header, '🥤 水吧', divider];
+  // Direct water items
+  if (byStation['water'] && byStation['water'].length) {
+    for (var i=0;i<byStation['water'].length;i++){
+      var it=byStation['water'][i];
+      var m=parseMods(it.mods);
+      var qty=it.qty>1?'×'+it.qty:'';
+      // Drink topping: swap info
+      var dtops=it.mods&&it.mods.indexOf('飲品配料：')>-1?it.mods.match(/飲品配料：([^·]+)/):null;
+      var dtopStr=dtops?'  配：'+dtops[1].trim():'';
+      waterLines.push(formatDrinkLine(it.zh,m)+qty+dtopStr);
+    }
+  }
+  // Set meal drinks from fire
+  for(var i=0;i<waterTaskNotes.length;i++){
+    var wt=waterTaskNotes[i];
+    var notesStr=wt.notes.join(' ');
+    // Extract drink name
+    var drinkName='';
+    var m2={sugar:'',ice:'',milk:'',size:''};
+    for(var j=0;j<wt.notes.length;j++){
+      var n=wt.notes[j];
+      if(SHORT_NAMES[n]){drinkName=SHORT_NAMES[n];}
+      else if(SUGAR_SHORT[n]){m2.sugar=SUGAR_SHORT[n];}
+      else if(ICE_SHORT[n]){m2.ice=ICE_SHORT[n];}
+      else if(n.indexOf('Oat')>-1){m2.milk='燕麥';}
+      else if(n.indexOf('700ml')>-1){m2.size='大杯';}
+    }
+    if(drinkName){
+      var prefix=wt.from==='fire'?'[套餐]':'[麵位]';
+      waterLines.push(prefix+' '+formatDrinkLine(drinkName,m2));
+    }
+  }
+  if (rmk) waterLines.push('📝 '+rmk);
+  waterLines.push('─────────');
+
+  // ── COMBINED MESSAGE (all stations in one) ──
+  var combined = [];
+  combined.push(header);
+  combined.push('');
+
+  if (byStation['fire']&&byStation['fire'].length||fireTaskTops.length>0) {
+    combined.push('🔥 火位');
+    combined = combined.concat(fireLines.slice(3, fireLines.length-1));
+    combined.push('');
+  }
+  if (byStation['noodle']&&byStation['noodle'].length) {
+    combined.push('🍜 麵位');
+    combined = combined.concat(noodleLines.slice(3, noodleLines.length-1));
+    combined.push('');
+  }
+  if (byStation['water']&&byStation['water'].length||waterTaskNotes.length>0) {
+    combined.push('🥤 水吧');
+    combined = combined.concat(waterLines.slice(3, waterLines.length-1));
+    combined.push('');
   }
 
-  if (rmk) { lines.push('📝 備注：'+rmk); lines.push(''); }
-  lines.push('══════════');
-  lines.push('合計 Total：£'+tot.toFixed(2));
-  return lines.join('\n');
+  if (rmk) { combined.push('📝 '+rmk); combined.push(''); }
+  combined.push('合計 £'+tot.toFixed(2));
+
+  return combined.join('\n');
 }
 
 function copyToClipboard(text) {
@@ -699,7 +891,7 @@ function sendOrder(){
     }
   }
 
-  var fullMsg = buildFullOrderMessage(byStation, fireTaskTops, waterTaskNotes, currentTable, no, rmk, tot);
+  var fullMsg = buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, currentTable, no, rmk, tot);
 
   // Copy to clipboard then open the group
   copyToClipboard(fullMsg).then(function(){

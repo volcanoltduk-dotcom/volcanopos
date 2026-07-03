@@ -246,6 +246,7 @@ var SUGAR_OPTS = ['多糖','正常','少糖','半糖','無糖'];
 var ICE_OPTS   = ['多冰','正常','少冰','走冰'];
 var MILK_OPTS  = ['全脂奶 Whole Milk','燕麥奶 Oat Milk'];
 var DRINK_TOPPINGS = ['珍珠 Tapioca','紅豆 Red Bean','芋泥 Sweet Taro','芒果爆珠','荔枝爆珠','士多啤梨爆珠','蜜桃爆珠','芝士忌廉 Cheese Foam'];
+// [6] 取消 Topping 數量限制；新增鹵水雞腎；[7] 鹵水系列通知火位
 var TOPPINGS = [
   {name:'招牌火山牛丸',isFire:false,isExtra:false},
   {name:'鮮蝦雞肉雲吞',isFire:false,isExtra:false},
@@ -263,9 +264,10 @@ var TOPPINGS = [
   {name:'牛串燒',isFire:true,isExtra:false},
   {name:'雞串燒',isFire:true,isExtra:false},
   {name:'土匪雞翼',isFire:true,isExtra:false},
-  {name:'鹵水豆腐',isFire:false,isExtra:false},
-  {name:'鹵水雞翼',isFire:false,isExtra:false},
-  {name:'鹵水蛋',isFire:false,isExtra:false},
+  {name:'鹵水豆腐',isFire:true,isExtra:false},  // [7] 通知火位
+  {name:'鹵水雞翼',isFire:true,isExtra:false},  // [7] 通知火位
+  {name:'鹵水蛋',isFire:true,isExtra:false},    // [7] 通知火位
+  {name:'鹵水雞腎',isFire:true,isExtra:false},  // [6][7] 新增，通知火位
   {name:'五香牛腩',isFire:true,isExtra:true},
   {name:'五香牛展',isFire:true,isExtra:false}
 ];
@@ -284,7 +286,10 @@ var MODS = {
   noodle_set:  {label:'麵底 Noodle (Set E)',opts:['脆麵+咖喱','乾撈麵+蠔油']},
   noodle_plain:{label:'加醬汁 +£1',opts:['不加','日式咖喱 +£1','蠔油葱薑 +£1']},
   toast:{label:'西多士餡料 Filling',opts:['花生醬 Peanut','榛子朱古力 Hazelnut Choc','開心果 Pistachio','芝士 Cheese']},
-  spice:{label:'辣度 Spice',opts:['小辣 Mild','中辣 Medium','大辣 Hot']}
+  // [5] 新增走辣
+  spice:{label:'辣度 Spice',opts:['走辣 None','小辣 Mild','中辣 Medium','大辣 Hot']},
+  // [9] 雪糕口味
+  icecream:{label:'雪糕口味 Ice Cream Flavour',opts:['芝麻 Sesame','玉桂 Cinnamon','港式奶茶 HK Milk Tea','鴛鴦 Yuanyang']}
 };
 var MENU = {
   water:{sections:[
@@ -309,16 +314,21 @@ var MENU = {
     ]},
     {t:'罐裝 Canned',items:[
       {zh:'罐裝飲品',en:'Canned Drink',p:2,mods:[]}
+    ]},
+    // [9] 新增雪糕
+    {t:'雪糕 Ice Cream',items:[
+      {zh:'雪糕 (杯)',en:'Ice Cream Cup',p:4.5,mods:['icecream']}
     ]}
   ]},
   fire:{sections:[
+    // [1] Set 名稱已改，[2] Set F 加 toast mod
     {t:'套餐 Set Meals（含飲品）',items:[
-      {zh:'Set A 雞串燒套餐',en:'Chicken Skewer Set',p:8.5,mods:['side','sauce','SET_DRINK']},
-      {zh:'Set B 牛串燒套餐',en:'Beef Skewer Set',p:8.5,mods:['side','sauce','SET_DRINK']},
-      {zh:'Set C 照燒豆腐套餐',en:'Teriyaki Soya Tofu Set (Vegan)',p:8.5,mods:['side','SET_DRINK']},
-      {zh:'Set D 脆炸雞套餐',en:'Crispy Chicken Set',p:8.5,mods:['side','sauce','SET_DRINK']},
-      {zh:'Set E 牛丸雲吞套餐',en:'Beef Ball & Wonton Set',p:9.5,mods:['noodle_set','SET_DRINK']},
-      {zh:'Set F 西多士套餐',en:'HK French Toast Set',p:8.5,mods:['toast','SET_DRINK']}
+      {zh:'Set A 雞串',en:'Chicken Skewer Set',p:8.5,mods:['side','sauce','SET_DRINK']},
+      {zh:'Set B 牛串',en:'Beef Skewer Set',p:8.5,mods:['side','sauce','SET_DRINK']},
+      {zh:'Set C 豆腐',en:'Teriyaki Soya Tofu Set (Vegan)',p:8.5,mods:['side','SET_DRINK']},
+      {zh:'Set D 炸雞',en:'Crispy Chicken Set',p:8.5,mods:['side','sauce','SET_DRINK']},
+      {zh:'Set E 牛丸雲吞',en:'Beef Ball & Wonton Set',p:9.5,mods:['noodle_set','SET_DRINK']},
+      {zh:'Set F 西多',en:'HK French Toast Set',p:8.5,mods:['toast','SET_DRINK']}
     ]},
     {t:'小食 Appetizer',items:[
       {zh:'雞串燒 (3串)',en:'3 Chicken Skewers',p:5,mods:[]},
@@ -339,11 +349,13 @@ var MENU = {
     ]}
   ]},
   noodle:{sections:[
-    {t:'米線 £8.80起（首1款配料包含，額外每款+£2，最多5款）',items:[
+    // [4] 新增蕃茄濃湯；[5] 走辣選項已在MODS加入
+    {t:'米線 £8.80起（首1款配料包含，額外每款+£2）',items:[
       {zh:'清湯米線',en:'Clear Chicken Broth',p:8.8,mods:['TOPPINGS','GARNISH','NOODLE_DRINK']},
       {zh:'酸辣湯米線',en:'Hot & Sour Soup',p:8.8,mods:['spice','TOPPINGS','GARNISH','NOODLE_DRINK']},
       {zh:'麻辣湯米線',en:'Mala Soup',p:8.8,mods:['spice','TOPPINGS','GARNISH','NOODLE_DRINK']},
-      {zh:'酸麻辣湯米線',en:'Hot & Sour Mala Soup',p:8.8,mods:['spice','TOPPINGS','GARNISH','NOODLE_DRINK']}
+      {zh:'酸麻辣湯米線',en:'Hot & Sour Mala Soup',p:8.8,mods:['spice','TOPPINGS','GARNISH','NOODLE_DRINK']},
+      {zh:'蕃茄濃湯米線',en:'Tomato Soup',p:8.8,mods:['TOPPINGS','GARNISH','NOODLE_DRINK']}
     ]},
     {t:'小食 Snacks',items:[
       {zh:'湯丸 - 花生 (5粒)',en:'5pcs Tangyuan - Peanut',p:4,mods:[]},
@@ -498,7 +510,7 @@ function buildDrinkCustomSection(sc,includeMilk){
 }
 
 function buildToppingSection(sc){
-  var h='<div class="mod-group"><div class="mod-label">配料 Toppings（最多5款）</div>'+
+  var h='<div class="mod-group"><div class="mod-label">配料 Toppings（無限追加）</div>'+
     '<div class="mod-hint">首1款包含・額外每款+£2・五香牛腩另加+£2<br><span style="color:var(--fire-t)">🔥虛線框＝需通知火位</span></div><div class="mod-opts">';
   for(var ti=0;ti<TOPPINGS.length;ti++){
     var t=TOPPINGS[ti];
@@ -520,12 +532,11 @@ function togTop(el){
   var isOn=el.classList.contains(sc);
   if(isOn){el.classList.remove('sel-w','sel-f','sel-n');for(var i=0;i<selToppings.length;i++){if(selToppings[i].name===name){selToppings.splice(i,1);break;}}}
   else{
-    if(selToppings.length>=5){var s=document.getElementById('top-status');if(s){s.className='topping-status over';s.textContent='⚠️ 最多5款';}return;}
     el.classList.add(sc); selToppings.push({name:name,isFire:isFire,isExtra:isExtra});
   }
   var cnt=selToppings.length,cost=0;
   for(var i=0;i<selToppings.length;i++){if(i>0)cost+=2;if(selToppings[i].isExtra)cost+=2;}
-  var el2=document.getElementById('top-status');if(el2){el2.className='topping-status'+(cnt>=5?' over':'');el2.textContent='已選 '+cnt+' / 5 款'+(cost>0?'  額外 +£'+cost:'  首1款包含');}
+  var el2=document.getElementById('top-status');if(el2){el2.className='topping-status';el2.textContent='已選 '+cnt+' 款'+(cost>0?'  額外 +£'+cost:'  首1款包含');}
 }
 function togDrinkTop(el){
   var name=el.getAttribute('data-dtop'),sc=el.getAttribute('data-sel'),isOn=el.classList.contains(sc);
@@ -618,13 +629,13 @@ function renderCart(){
 // ─────────────────────────────────────────
 var SHORT_NAMES = {
   // 米線
-  '清湯米線':'清湯米線','酸辣湯米線':'酸辣米線','麻辣湯米線':'麻辣米線','酸麻辣湯米線':'酸麻米線',
+  '清湯米線':'清湯米線','酸辣湯米線':'酸辣米線','麻辣湯米線':'麻辣米線','酸麻辣湯米線':'酸麻米線','蕃茄濃湯米線':'蕃茄米線',
   // 配料
   '招牌火山牛丸':'牛丸','鮮蝦雞肉雲吞':'雲吞','魚豆腐':'魚豆腐','魚蛋':'魚蛋',
   '墨魚丸':'墨魚丸','流心牛丸':'流心丸','肥牛':'肥牛','魚春卷':'魚春卷',
   '炸魚春卷':'炸魚春卷','豆卜':'豆卜','腐皮':'腐皮','芽菜':'芽菜','酸菜':'酸菜',
   '牛串燒':'牛串','雞串燒':'雞串','土匪雞翼':'雞翼','鹵水豆腐':'鹵豆腐',
-  '鹵水雞翼':'鹵雞翼','鹵水蛋':'鹵蛋','五香牛腩':'牛腩','五香牛展':'牛展',
+  '鹵水雞翼':'鹵雞翼','鹵水蛋':'鹵蛋','鹵水雞腎':'鹵雞腎','五香牛腩':'牛腩','五香牛展':'牛展',
   // 飲品
   '台式珍珠奶茶':'珍奶','黑糖珍珠奶茶':'黑糖珍奶','朱古力珍珠奶茶':'朱古力珍奶',
   '椰奶紅豆奶茶':'椰紅豆奶','芋泥奶茶':'芋泥奶','芒果果茶':'芒果茶',
@@ -635,9 +646,9 @@ var SHORT_NAMES = {
   '荔枝果茶 +£2':'荔枝茶','青蘋果果茶 +£2':'青蘋茶','白桃果茶 +£2':'白桃茶',
   '檸檬果茶 +£2':'檸檬茶','黑茶芝士 +£2':'黑茶芝士','茉莉芝士 +£2':'茉莉芝士',
   '抹茶拿鐵 +£3':'抹茶拿鐵','抹茶拿鐵 +£1':'抹茶拿鐵','罐裝飲品':'罐裝','罐裝飲品 +£1':'罐裝',
-  // 套餐
-  'Set A 雞串燒套餐':'Set A','Set B 牛串燒套餐':'Set B','Set C 照燒豆腐套餐':'Set C',
-  'Set D 脆炸雞套餐':'Set D','Set E 牛丸雲吞套餐':'Set E','Set F 西多士套餐':'Set F',
+  // [1] 新 Set 簡稱
+  'Set A 雞串':'Set A 雞串','Set B 牛串':'Set B 牛串','Set C 豆腐':'Set C 豆腐',
+  'Set D 炸雞':'Set D 炸雞','Set E 牛丸雲吞':'Set E 牛丸雲吞','Set F 西多':'Set F 西多',
   // 小食
   '雞串燒 (3串)':'雞串×3','牛串燒 (3串)':'牛串×3','脆炸雞 (3件)':'炸雞×3',
   '牛肉丸 (6粒)':'牛丸×6','炸雲吞 (6隻)':'炸雲吞×6','炸豆腐 (6件)':'炸豆腐×6',
@@ -646,7 +657,9 @@ var SHORT_NAMES = {
   '土匪雞翼 (5隻)':'雞翼×5','土匪雞翼 (10隻)':'雞翼×10',
   '炸魷魚鬚':'魷魚鬚',
   '湯丸 - 花生 (5粒)':'花生湯丸','湯丸 - 紅豆 (5粒)':'紅豆湯丸','湯丸 - 芝麻 (5粒)':'芝麻湯丸',
-  '雲吞湯 (5粒)':'雲吞湯'
+  '雲吞湯 (5粒)':'雲吞湯',
+  // [9] 雪糕
+  '雪糕 (杯)':'雪糕'
 };
 
 function shorten(name) {
@@ -657,10 +670,79 @@ function shorten(name) {
 var SUGAR_SHORT = {'多糖':'多糖','正常':'正常糖','半糖':'半糖','少糖':'少糖','無糖':'無糖'};
 // Ice → short label
 var ICE_SHORT = {'多冰':'多冰','正常':'正常冰','少冰':'少冰','走冰':'無冰'};
-// Spice → emoji
-var SPICE_EMOJI = {'小辣 Mild':'🌶️Mild','中辣 Medium':'🌶️🌶️Med','大辣 Hot':'🌶️🌶️🌶️Hot'};
+// [5] 新增走辣
+var SPICE_EMOJI = {'走辣 None':'🚫辣','小辣 Mild':'🌶️Mild','中辣 Medium':'🌶️🌶️Med','大辣 Hot':'🌶️🌶️🌶️Hot'};
+// [2] Toast filling short names
+var TOAST_SHORT = {'花生醬 Peanut':'花生醬','榛子朱古力 Hazelnut Choc':'榛子朱古力','開心果 Pistachio':'開心果','芝士 Cheese':'芝士'};
 
 // Extract key parts from a mods string
+// [2] Extract toast flavour from mods string
+function extractToastFlavour(modsStr) {
+  if (!modsStr) return '';
+  var TOAST_MAP = {
+    '花生醬 Peanut':'花生醬',
+    '榛子朱古力 Hazelnut Choc':'榛子朱古力',
+    '開心果 Pistachio':'開心果',
+    'Pistachio':'開心果',
+    '芝士 Cheese':'芝士',
+    'Cheese':'芝士',
+    'Peanut':'花生醬',
+    'Hazelnut':'榛子朱古力'
+  };
+  var keys = Object.keys(TOAST_MAP);
+  for (var i=0;i<keys.length;i++) {
+    if (modsStr.indexOf(keys[i])>-1) return TOAST_MAP[keys[i]];
+  }
+  return '';
+}
+
+// [8] Export orders as CSV
+function downloadCSV() {
+  if (!orderHistory.length) { alert('暫無訂單資料 No orders yet'); return; }
+  var rows = [];
+  // Header row
+  rows.push(['訂單編號','日期時間','枱號','商品','配料/飲品/要求','金額(£)','訂單總計(£)']);
+  var grandTotal = 0;
+  for (var i=0;i<orderHistory.length;i++) {
+    var o = orderHistory[i];
+    grandTotal += o.tot||0;
+    // Collect all items
+    var itemLines = [];
+    var modLines = [];
+    for (var j=0;j<o.items.length;j++) {
+      var it = o.items[j];
+      itemLines.push(it.zh + ' ×' + it.qty + ' £' + (it.p*it.qty).toFixed(2));
+      if (it.mods) modLines.push(it.mods);
+    }
+    if (o.rmk) modLines.push('備注：'+o.rmk);
+    var today = new Date();
+    var dateStr = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    rows.push([
+      '#'+o.no,
+      dateStr+' '+o.ts,
+      o.table||'',
+      '"'+itemLines.join('\n')+'"',
+      '"'+(modLines.join('\n')||'-')+'"',
+      (o.tot||0).toFixed(2),
+      '' // blank, filled in summary
+    ]);
+  }
+  // Summary row
+  rows.push(['','','','','合計 GRAND TOTAL','',grandTotal.toFixed(2)]);
+
+  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
+  var BOM = '\uFEFF'; // UTF-8 BOM for Excel
+  var blob = new Blob([BOM+csv], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var now = new Date();
+  var fname = 'VOLCANO_orders_'+now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate()+'.csv';
+  a.href=url; a.download=fname;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function parseMods(modsStr) {
   if (!modsStr) return {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:''};
   var result = {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:''};
@@ -738,20 +820,25 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
       var line=name+qty;
       if(m.size&&(m.size==='白飯'||m.size==='薯條')) line+='  '+m.size;
       if(m.sugar&&(m.sugar==='咖喱'||m.sugar==='照燒')) line+='  '+m.sugar;
+      // [2] Set F 西多：顯示口味
+      if(it.zh.indexOf('西多')>-1){
+        var tf=extractToastFlavour(it.mods);
+        if(tf) line+='（'+tf+'）';
+      }
       fireLines.push(line);
     }
   }
-  // Fire tasks from noodle toppings
+  // [7] Fire tasks from noodle toppings — formatted as bullet list
   if (fireTaskTops.length>0) {
-    var merged={};
-    for(var i=0;i<fireTaskTops.length;i++){var s=shorten(fireTaskTops[i]);merged[s]=(merged[s]||0)+1;}
-    var topStr=Object.keys(merged).map(function(k){return k+(merged[k]>1?'×'+merged[k]:'');}).join('  ');
-    fireLines.push('配：'+topStr);
+    var ftMerged={};
+    for(var i=0;i<fireTaskTops.length;i++){var fs=shorten(fireTaskTops[i]);ftMerged[fs]=(ftMerged[fs]||0)+1;}
+    fireLines.push('配料：');
+    Object.keys(ftMerged).forEach(function(k){fireLines.push('• '+k+(ftMerged[k]>1?' ×'+ftMerged[k]:''));});
   }
   if (rmk) fireLines.push('📝 '+rmk);
   fireLines.push('─────────');
 
-  // ── 🍜 NOODLE STATION ──
+  // ── 🍜 NOODLE STATION — [3] 完整顯示所有配菜要求 ──
   var noodleLines = [header, '🍜 麵位', divider];
   if (byStation['noodle'] && byStation['noodle'].length) {
     for (var i=0;i<byStation['noodle'].length;i++){
@@ -759,51 +846,58 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
       var m=parseMods(it.mods);
       var name=shorten(it.zh);
       var qty=it.qty>1?'×'+it.qty:'';
-      // Spice
+      // Line 1: 湯底 + 辣度
       var spicePart=m.spice?' '+m.spice:'';
       noodleLines.push(name+qty+spicePart);
-      // Toppings
+      // Line 2: 配料（完整顯示）
       if(m.tops.length>0){
-        var merged={};
-        for(var j=0;j<m.tops.length;j++){merged[m.tops[j]]=(merged[m.tops[j]]||0)+1;}
-        var topStr=Object.keys(merged).map(function(k){return k+(merged[k]>1?'×'+merged[k]:'');}).join('  ');
-        noodleLines.push('配：'+topStr);
+        var tMerged={};
+        for(var j=0;j<m.tops.length;j++){tMerged[m.tops[j]]=(tMerged[m.tops[j]]||0)+1;}
+        var tStr=Object.keys(tMerged).map(function(k){return k+(tMerged[k]>1?'×'+tMerged[k]:'');}).join('  ');
+        noodleLines.push('配：'+tStr);
       }
-      // Garnish / walk
+      // Line 3: 走料 ❌
       if(m.garnish.length>0){
         var walks=m.garnish.filter(function(g){return g.indexOf('走')===0;});
-        var adds=m.garnish.filter(function(g){return g.indexOf('走')!==0&&g!=='加底';});
+        var adds=m.garnish.filter(function(g){return g==='多葱'||g==='多芫茜';});
         var extra=m.garnish.filter(function(g){return g==='加底';});
         if(walks.length>0) noodleLines.push('❌ '+walks.map(function(g){return g.replace('走','');}).join(' '));
         if(adds.length>0) noodleLines.push('➕ '+adds.join(' '));
         if(extra.length>0) noodleLines.push('加底');
       }
+      // Line 4: 追加飲品
+      if(m.drink&&m.drink!=='不加'){
+        var dLine='飲：'+m.drink;
+        if(m.sugar) dLine+='  '+m.sugar;
+        if(m.ice) dLine+='  '+m.ice;
+        if(m.milk) dLine+='  '+m.milk;
+        noodleLines.push(dLine);
+      }
     }
-    // Noodle snacks
-    var snacks=['湯丸 - 花生 (5粒)','湯丸 - 紅豆 (5粒)','湯丸 - 芝麻 (5粒)','雲吞湯 (5粒)'];
   }
   if (rmk) noodleLines.push('📝 '+rmk);
   noodleLines.push('─────────');
 
   // ── 🥤 WATER BAR ──
   var waterLines = [header, '🥤 水吧', divider];
-  // Direct water items
   if (byStation['water'] && byStation['water'].length) {
     for (var i=0;i<byStation['water'].length;i++){
       var it=byStation['water'][i];
       var m=parseMods(it.mods);
       var qty=it.qty>1?'×'+it.qty:'';
-      // Drink topping: swap info
+      // [9] 雪糕：顯示口味
+      if(it.zh.indexOf('雪糕')>-1){
+        var flavour=m.drink||'';
+        waterLines.push('雪糕'+qty+(flavour?'（'+flavour+'）':''));
+        continue;
+      }
       var dtops=it.mods&&it.mods.indexOf('飲品配料：')>-1?it.mods.match(/飲品配料：([^·]+)/):null;
       var dtopStr=dtops?'  配：'+dtops[1].trim():'';
       waterLines.push(formatDrinkLine(it.zh,m)+qty+dtopStr);
     }
   }
-  // Set meal drinks from fire
   for(var i=0;i<waterTaskNotes.length;i++){
     var wt=waterTaskNotes[i];
-    var notesStr=wt.notes.join(' ');
-    // Extract drink name
     var drinkName='';
     var m2={sugar:'',ice:'',milk:'',size:''};
     for(var j=0;j<wt.notes.length;j++){
@@ -949,6 +1043,10 @@ function saveHistory(){
 function loadHistory(){
   try{ var r=localStorage.getItem('volcano_history'); if(r){var d=JSON.parse(r); if(d.history){orderHistory=d.history;oNo=d.oNo||1;}} }catch(e){}
 }
+function clearHistory(){
+  if(!confirm('確認清除所有歷史訂單？\nConfirm clear all order history?')) return;
+  orderHistory=[]; oNo=1; saveHistory(); renderHistory(); closeManage();
+}
 
 // ─────────────────────────────────────────
 // MANAGE / PAUSE + WHATSAPP NUMBERS DISPLAY
@@ -961,6 +1059,10 @@ function openManage(){
   h+='<div class="wa-info">📲 訂單會複製到剪貼簿，並打開以下 WhatsApp 群組（請手動貼上發送）</div>';
   h+='<div class="wa-row"><span class="wa-station">🌋 訂單群組</span><span class="wa-num" style="font-size:10px;word-break:break-all">'+WA_GROUP_LINK+'</span></div>';
 
+  h+='<div style="display:flex;gap:8px;margin-bottom:14px">'+
+    '<button onclick="downloadCSV()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--noodle);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📥 匯出訂單 CSV</button>'+
+    '<button onclick="clearHistory()" style="flex:1;padding:10px;border:1px solid #c0392b;border-radius:10px;background:transparent;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑 清除歷史</button>'+
+    '</div>';
   h+='<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">暫停菜式 Pause Items</div>';
   for(var s=0;s<stKeys.length;s++){
     var st=stKeys[s];

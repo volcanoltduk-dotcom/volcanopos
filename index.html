@@ -564,25 +564,91 @@ function selOpt(el){
 // ─────────────────────────────────────────
 function confirmMod(){
   if(!pendingItem) return;
-  var modParts=[],extraPrice=0,fireTops=[],waterNotes=[];
+  var extraPrice=0, fireTops=[], waterNotes=[];
   var keys=Object.keys(custSel);
-  for(var i=0;i<keys.length;i++){var k=keys[i],v=custSel[k].val,dp=custSel[k].drinkPrice||0;if(v){modParts.push(v);extraPrice+=dp;}}
+
+  // ── 基本選項 ──
+  var spice='', sugar='', ice='', milk='', side='', sauce='', setDrink='', noodleDrink='', cupSize='', noodleType='', toastFilling='';
+  for(var i=0;i<keys.length;i++){
+    var k=keys[i], v=custSel[k].val, dp=custSel[k].drinkPrice||0;
+    if(!v) continue;
+    extraPrice+=dp;
+    if(k==='spice') spice=v;
+    else if(k==='sugar') sugar=v;
+    else if(k==='ice') ice=v;
+    else if(k==='milk') milk=v;
+    else if(k==='side') side=v;
+    else if(k==='sauce') sauce=v;
+    else if(k==='set_drink') setDrink=v;
+    else if(k==='noodle_drink') noodleDrink=v;
+    else if(k==='cup_size') cupSize=v;
+    else if(k==='noodle_set') noodleType=v;
+    else if(k==='toast') toastFilling=v;
+    else if(k==='icecream') toastFilling=v; // reuse for ice cream flavour
+  }
+
+  // ── 飲品 Topping ──
+  var drinkTopStr='';
   if(selDrinkToppings.length>0){
     var dtcost=Math.max(0,selDrinkToppings.length-1)*0.5;
-    modParts.push('飲品配料：'+selDrinkToppings.join('、')); extraPrice+=dtcost;
+    extraPrice+=dtcost;
+    drinkTopStr=selDrinkToppings.join('、');
   }
-  var drinkKeys=['sugar','ice','milk','set_drink','noodle_drink','cup_size'];
-  var dnp=[];
-  for(var i=0;i<drinkKeys.length;i++){var k=drinkKeys[i];if(custSel[k]&&custSel[k].val) dnp.push(custSel[k].val);}
-  if(selDrinkToppings.length>0) dnp.push('配料：'+selDrinkToppings.join('、'));
-  if(dnp.length>0) waterNotes=dnp;
+
+  // ── 配料 Toppings ──
+  var topNames=[];
   if(pendingItem.mods.indexOf('TOPPINGS')>=0&&selToppings.length>0){
-    var topNames=[];
-    for(var i=0;i<selToppings.length;i++){var t=selToppings[i];topNames.push(t.name);if(i>0)extraPrice+=2;if(t.isExtra)extraPrice+=2;if(t.isFire)fireTops.push(t.name);}
-    modParts.push('配料：'+topNames.join('、'));
+    for(var i=0;i<selToppings.length;i++){
+      var t=selToppings[i];
+      topNames.push(t.name);
+      if(i>0) extraPrice+=2;
+      if(t.isExtra) extraPrice+=2;
+      if(t.isFire) fireTops.push(t.name);
+    }
   }
-  if(selGarnish.length>0){var gl=[];for(var i=0;i<selGarnish.length;i++){gl.push(selGarnish[i].label);extraPrice+=selGarnish[i].price;}modParts.push(gl.join(' '));}
-  addToCart(pendingItem.st,pendingItem.zh,pendingItem.en,pendingItem.p,modParts.join(' · '),fireTops,waterNotes,extraPrice);
+
+  // ── 配菜 Garnish ──
+  var garnishList=[];
+  if(selGarnish.length>0){
+    for(var i=0;i<selGarnish.length;i++){
+      garnishList.push(selGarnish[i].label);
+      extraPrice+=selGarnish[i].price;
+    }
+  }
+
+  // ── 水吧 waterNotes (飲品相關) ──
+  var dnp=[];
+  if(setDrink) dnp.push(setDrink);
+  if(noodleDrink&&noodleDrink!=='不加') dnp.push(noodleDrink);
+  if(sugar) dnp.push(sugar);
+  if(ice) dnp.push(ice);
+  if(milk) dnp.push(milk);
+  if(cupSize) dnp.push(cupSize);
+  if(drinkTopStr) dnp.push('配料：'+drinkTopStr);
+  if(dnp.length>0) waterNotes=dnp;
+
+  // ── 儲存結構化資料 ──
+  var structured = {
+    spice:spice, sugar:sugar, ice:ice, milk:milk,
+    side:side, sauce:sauce, setDrink:setDrink,
+    noodleDrink:(noodleDrink==='不加'?'':noodleDrink),
+    cupSize:cupSize, noodleType:noodleType, toastFilling:toastFilling,
+    tops:topNames, garnish:garnishList, drinkTops:drinkTopStr
+  };
+
+  // ── 顯示用 mods string（落單畫面用）──
+  var displayParts=[];
+  if(spice) displayParts.push(SPICE_EMOJI[spice]||spice);
+  if(topNames.length>0) displayParts.push('配：'+topNames.join('、'));
+  if(garnishList.length>0) displayParts.push(garnishList.join(' '));
+  if(setDrink) displayParts.push('飲：'+setDrink);
+  if(noodleDrink&&noodleDrink!=='不加') displayParts.push('追加：'+noodleDrink);
+  if(sugar||ice) displayParts.push([sugar,ice].filter(Boolean).join('｜'));
+  if(toastFilling) displayParts.push('餡：'+toastFilling);
+  if(side) displayParts.push(side);
+  if(sauce) displayParts.push(sauce);
+
+  addToCart(pendingItem.st,pendingItem.zh,pendingItem.en,pendingItem.p,displayParts.join(' · '),fireTops,waterNotes,extraPrice,structured);
   closeModal();
 }
 
@@ -595,8 +661,8 @@ document.getElementById('modal-overlay').addEventListener('click',function(e){if
 // ─────────────────────────────────────────
 // CART
 // ─────────────────────────────────────────
-function addToCart(st,zh,en,p,mods,fireTops,waterNotes,extraP){
-  cart.push({st:st,zh:zh,en:en,p:p+(extraP||0),qty:1,mods:mods,fireTops:fireTops||[],waterNotes:waterNotes||[]});
+function addToCart(st,zh,en,p,mods,fireTops,waterNotes,extraP,structured){
+  cart.push({st:st,zh:zh,en:en,p:p+(extraP||0),qty:1,mods:mods,fireTops:fireTops||[],waterNotes:waterNotes||[],structured:structured||null});
   renderCart();
 }
 function chgQty(idx,d){cart[idx].qty+=d;if(cart[idx].qty<=0)cart.splice(idx,1);renderCart();}
@@ -746,47 +812,63 @@ function downloadCSV() {
 }
 
 function parseMods(modsStr) {
-  if (!modsStr) return {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:''};
-  var result = {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:''};
+  if (!modsStr) return {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:'',raw:[]};
+  var result = {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:'',raw:[]};
   var parts = modsStr.split(' · ');
+  result.raw = parts;
+
+  // All possible garnish labels
+  var GARNISH_LABELS = ['多葱','走葱','多芫茜','走芫茜','走芽菜','走腐皮','加底'];
+
   for (var i=0;i<parts.length;i++) {
     var p = parts[i].trim();
-    // Spice
-    if (p.indexOf('Mild')>-1||p.indexOf('Med')>-1||p.indexOf('Hot')>-1||p.indexOf('辣')>-1) {
+    if (!p) continue;
+
+    // ── 辣度 Spice ──
+    if (p==='走辣 None'||p==='小辣 Mild'||p==='中辣 Medium'||p==='大辣 Hot') {
       result.spice = SPICE_EMOJI[p] || p;
     }
-    // Sugar
-    else if (SUGAR_SHORT[p]) { result.sugar = SUGAR_SHORT[p]; }
-    // Ice
-    else if (ICE_SHORT[p]) { result.ice = ICE_SHORT[p]; }
-    // Milk
-    else if (p.indexOf('Oat')>-1) { result.milk = '燕麥'; }
-    // Size upgrade
-    else if (p.indexOf('700ml')>-1) { result.size = '大杯'; }
-    // Toppings line
-    else if (p.indexOf('配料：')===0) {
-      var topStr = p.replace('配料：','');
-      result.tops = topStr.split('、').map(function(t){return shorten(t.trim());});
+    // ── 糖度 Sugar ──
+    else if (p==='多糖'||p==='正常'||p==='半糖'||p==='少糖'||p==='無糖') {
+      result.sugar = SUGAR_SHORT[p]||p;
     }
-    // Garnish
-    else if (p==='多葱'||p==='走葱'||p==='多芫茜'||p==='走芫茜'||p==='走芽菜'||p==='走腐皮'||p.indexOf('加底')>-1) {
-      result.garnish.push(p.indexOf('+')>-1?'加底':p);
+    // ── 冰度 Ice ──
+    else if (p==='多冰'||p==='正常'||p==='少冰'||p==='走冰') {
+      result.ice = ICE_SHORT[p]||p;
     }
-    // Drink
-    else if (p.indexOf('珍奶')>-1||p.indexOf('茶')>-1||p.indexOf('拿鐵')>-1||p.indexOf('罐裝')>-1||SHORT_NAMES[p]||p.indexOf('不加')===0) {
-      if (p!=='不加') result.drink = shorten(p);
+    // ── 奶類 Milk ──
+    else if (p.indexOf('Oat')>-1||p.indexOf('燕麥')>-1) { result.milk='燕麥'; }
+    else if (p.indexOf('Whole')>-1||p.indexOf('全脂')>-1) { result.milk='全脂'; }
+    // ── 杯型 Size ──
+    else if (p.indexOf('700ml')>-1) { result.size='大杯'; }
+    // ── 配料 Toppings ──
+    else if (p.indexOf('配料：')===0||p.indexOf('配料:')===0) {
+      var topStr = p.replace('配料：','').replace('配料:','');
+      result.tops = topStr.split('、').map(function(t){return shorten(t.trim());}).filter(Boolean);
     }
-    // Noodle type
-    else if (p==='脆麵+咖喱'||p==='乾撈麵+蠔油') { result.drink = p; }
-    // Toast filling
-    else if (p.indexOf('Peanut')>-1||p.indexOf('Hazelnut')>-1||p.indexOf('Pistachio')>-1||p.indexOf('Cheese')>-1) {
-      result.drink = p.split(' ')[0];
+    // ── 配菜要求 Garnish ──
+    else if (GARNISH_LABELS.indexOf(p.replace(' +£1',''))>-1||p.indexOf('加底')>-1) {
+      result.garnish.push(p.replace(' +£1',''));
     }
-    // Side
-    else if (p==='白飯 Rice'||p==='薯條 Chips') { result.size = (p==='白飯 Rice'?'白飯':'薯條'); }
-    // Sauce
-    else if (p.indexOf('Curry')>-1) { result.sugar = '咖喱'; }
-    else if (p.indexOf('Teriyaki')>-1) { result.sugar = '照燒'; }
+    // ── 追加飲品 Drink ──
+    else if (p==='不加') { /* skip */ }
+    else if (p.indexOf('珍奶')>-1||p.indexOf('茶')>-1||p.indexOf('拿鐵')>-1||p.indexOf('罐裝')>-1) {
+      result.drink = shorten(p);
+    }
+    else if (SHORT_NAMES[p]) { result.drink = SHORT_NAMES[p]; }
+    // ── 麵底 Noodle type ──
+    else if (p==='脆麵+咖喱'||p==='乾撈麵+蠔油') { result.drink=p; }
+    // ── 西多士餡料 Toast ──
+    else if (p.indexOf('Peanut')>-1) { result.drink='花生醬'; }
+    else if (p.indexOf('Hazelnut')>-1) { result.drink='榛子朱古力'; }
+    else if (p.indexOf('Pistachio')>-1) { result.drink='開心果'; }
+    else if (p.indexOf('Cheese')>-1&&p.indexOf('Foam')<0) { result.drink='芝士'; }
+    // ── 主食 Side ──
+    else if (p==='白飯 Rice') { result.size='白飯'; }
+    else if (p==='薯條 Chips') { result.size='薯條'; }
+    // ── 醬汁 Sauce ──
+    else if (p.indexOf('Curry')>-1) { result.sauce='咖喱'; }
+    else if (p.indexOf('Teriyaki')>-1) { result.sauce='照燒'; }
   }
   return result;
 }
@@ -840,41 +922,52 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
   if (rmk) fireLines.push('📝 '+rmk);
   fireLines.push('─────────');
 
-  // ── 🍜 NOODLE STATION — [3] 完整顯示所有配菜要求 ──
+  // ── 🍜 NOODLE STATION — 使用結構化資料，保證完整顯示 ──
   var noodleLines = [header, '🍜 麵位', divider];
   if (byStation['noodle'] && byStation['noodle'].length) {
     for (var i=0;i<byStation['noodle'].length;i++){
       var it=byStation['noodle'][i];
-      var m=parseMods(it.mods);
+      var s=it.structured;
       var name=shorten(it.zh);
-      var qty=it.qty>1?'×'+it.qty:'';
+      var qty=it.qty>1?' ×'+it.qty:'';
+
       // Line 1: 湯底 + 辣度
-      var spicePart=m.spice?' '+m.spice:'';
-      noodleLines.push(name+qty+spicePart);
-      // Line 2: 配料（完整顯示）
-      if(m.tops.length>0){
+      var spiceStr='';
+      if(s&&s.spice) spiceStr=' '+(SPICE_EMOJI[s.spice]||s.spice);
+      noodleLines.push(name+qty+spiceStr);
+
+      // Line 2: 配料（完整列出每款）
+      if(s&&s.tops&&s.tops.length>0){
         var tMerged={};
-        for(var j=0;j<m.tops.length;j++){tMerged[m.tops[j]]=(tMerged[m.tops[j]]||0)+1;}
-        var tStr=Object.keys(tMerged).map(function(k){return k+(tMerged[k]>1?'×'+tMerged[k]:'');}).join('  ');
-        noodleLines.push('配：'+tStr);
+        for(var j=0;j<s.tops.length;j++){var tk=shorten(s.tops[j]);tMerged[tk]=(tMerged[tk]||0)+1;}
+        var tParts=Object.keys(tMerged).map(function(k){return k+(tMerged[k]>1?' ×'+tMerged[k]:'');});
+        noodleLines.push('配：'+tParts.join('  '));
       }
-      // Line 3: 走料 ❌
-      if(m.garnish.length>0){
-        var walks=m.garnish.filter(function(g){return g.indexOf('走')===0;});
-        var adds=m.garnish.filter(function(g){return g==='多葱'||g==='多芫茜';});
-        var extra=m.garnish.filter(function(g){return g==='加底';});
-        if(walks.length>0) noodleLines.push('❌ '+walks.map(function(g){return g.replace('走','');}).join(' '));
+
+      // Line 3: 走料 ❌ / 多料 ➕ / 加底
+      if(s&&s.garnish&&s.garnish.length>0){
+        var walks=[], adds=[], extra=false;
+        for(var j=0;j<s.garnish.length;j++){
+          var g=s.garnish[j];
+          if(g==='加底 +£1'||g==='加底') extra=true;
+          else if(g.indexOf('走')===0) walks.push(g.replace('走',''));
+          else if(g.indexOf('多')===0) adds.push(g);
+        }
+        if(walks.length>0) noodleLines.push('❌ '+walks.join(' '));
         if(adds.length>0) noodleLines.push('➕ '+adds.join(' '));
-        if(extra.length>0) noodleLines.push('加底');
+        if(extra) noodleLines.push('＋加底');
       }
-      // Line 4: 追加飲品
-      if(m.drink&&m.drink!=='不加'){
-        var dLine='飲：'+m.drink;
-        if(m.sugar) dLine+='  '+m.sugar;
-        if(m.ice) dLine+='  '+m.ice;
-        if(m.milk) dLine+='  '+m.milk;
-        noodleLines.push(dLine);
+
+      // Line 4: 追加飲品（如有）
+      if(s&&s.noodleDrink&&s.noodleDrink!=='不加'&&s.noodleDrink!==''){
+        var dParts=[shorten(s.noodleDrink)];
+        if(s.sugar) dParts.push(SUGAR_SHORT[s.sugar]||s.sugar);
+        if(s.ice) dParts.push(ICE_SHORT[s.ice]||s.ice);
+        if(s.milk&&(s.milk.indexOf('Oat')>-1||s.milk.indexOf('燕麥')>-1)) dParts.push('燕麥');
+        noodleLines.push('飲：'+dParts.join('｜'));
       }
+
+      if(i < byStation['noodle'].length-1) noodleLines.push('');
     }
   }
   if (rmk) noodleLines.push('📝 '+rmk);
@@ -887,9 +980,9 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
       var it=byStation['water'][i];
       var m=parseMods(it.mods);
       var qty=it.qty>1?'×'+it.qty:'';
-      // [9] 雪糕：顯示口味
+      // [9] 雪糕：顯示口味（用結構化資料）
       if(it.zh.indexOf('雪糕')>-1){
-        var flavour=m.drink||'';
+        var flavour=(it.structured&&it.structured.toastFilling)||'';
         waterLines.push('雪糕'+qty+(flavour?'（'+flavour+'）':''));
         continue;
       }

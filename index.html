@@ -265,12 +265,12 @@ var TOPPINGS = [
   {name:'牛串燒',isFire:true,isExtra:false},
   {name:'雞串燒',isFire:true,isExtra:false},
   {name:'土匪雞翼',isFire:true,isExtra:false},
-  {name:'鹵水豆腐',isFire:true,isExtra:false},  // [7] 通知火位
-  {name:'鹵水雞翼',isFire:true,isExtra:false},  // [7] 通知火位
-  {name:'鹵水蛋',isFire:true,isExtra:false},    // [7] 通知火位
-  {name:'鹵水雞腎',isFire:true,isExtra:false},  // [6][7] 新增，通知火位
-  {name:'五香牛腩',isFire:false,isExtra:true},  // 另加 +£2
-  {name:'五香牛展',isFire:false,isExtra:false}
+  {name:'鹵水豆腐',isFire:true,isExtra:false},
+  {name:'鹵水雞翼',isFire:true,isExtra:false},
+  {name:'鹵水蛋',isFire:true,isExtra:false},
+  {name:'鹵水雞腎',isFire:true,isExtra:false},
+  {name:'五香牛腩',isFire:false,isExtra:true},
+  {name:'五香牛展',isFire:true,isExtra:false}
 ];
 var GARNISH_OPTS = [
   {label:'多葱',price:0},{label:'走葱',price:0},
@@ -930,6 +930,18 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
       var name=shorten(it.zh);
       var qty=it.qty>1?' ×'+it.qty:'';
 
+      // ── Fallback: parse from mods string if structured is missing ──
+      if (!s && it.mods) {
+        var mFB = parseMods(it.mods);
+        s = {
+          spice: mFB.spice ? Object.keys(SPICE_EMOJI).find(function(k){return SPICE_EMOJI[k]===mFB.spice;})||mFB.spice : '',
+          tops: mFB.tops||[],
+          garnish: mFB.garnish||[],
+          noodleDrink: mFB.drink||'',
+          sugar: mFB.sugar||'', ice: mFB.ice||'', milk: mFB.milk||''
+        };
+      }
+
       // Line 1: 湯底 + 辣度
       var spiceStr='';
       if(s&&s.spice) spiceStr=' '+(SPICE_EMOJI[s.spice]||s.spice);
@@ -1070,7 +1082,7 @@ function sendOrder(){
   for(var i=0;i<cart.length;i++){
     var it=cart[i];
     if(!byStation[it.st]) byStation[it.st]=[];
-    byStation[it.st].push({zh:it.zh,en:it.en,p:it.p,qty:it.qty,mods:it.mods,structured:it.structured});
+    byStation[it.st].push({zh:it.zh,en:it.en,p:it.p,qty:it.qty,mods:it.mods,structured:it.structured||null});
     if(it.st==='noodle'&&it.fireTops&&it.fireTops.length>0){
       fireTaskTops = fireTaskTops.concat(it.fireTops);
     }

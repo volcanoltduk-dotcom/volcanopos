@@ -885,7 +885,7 @@ function formatDrinkLine(drinkName, m) {
 // ─────────────────────────────────────────
 // BUILD SMART STATION MESSAGES
 // ─────────────────────────────────────────
-function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, rmk, tot) {
+function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, rmk, tot, noodleTaskItems) {
   var now = new Date();
   var hh=now.getHours(),mm=now.getMinutes();
   var ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
@@ -898,11 +898,18 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
     for (var i=0;i<byStation['fire'].length;i++){
       var it=byStation['fire'][i];
       var m=parseMods(it.mods);
+      var s=it.structured;
       var name=shorten(it.zh);
       var qty=it.qty>1?'×'+it.qty:'';
       var line=name+qty;
       if(m.size&&(m.size==='白飯'||m.size==='薯條')) line+='  '+m.size;
-      if(m.sugar&&(m.sugar==='咖喱'||m.sugar==='照燒')) line+='  '+m.sugar;
+      // [1] Sauce: use structured if available, fallback to parseMods
+      var sauceVal=(s&&s.sauce)?s.sauce:(m.sauce||'');
+      if(sauceVal){
+        var sauceShort=sauceVal.indexOf('Curry')>-1||sauceVal.indexOf('咖喱')>-1?'喱':
+                       sauceVal.indexOf('Teriyaki')>-1||sauceVal.indexOf('照燒')>-1?'油':'';
+        if(sauceShort) line+='  汁：'+sauceShort;
+      }
       // [2] Set F 西多：顯示口味
       if(it.zh.indexOf('西多')>-1){
         var tf=extractToastFlavour(it.mods);
@@ -911,11 +918,11 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
       fireLines.push(line);
     }
   }
-  // [7] Fire tasks from noodle toppings — formatted as bullet list
+  // Fire tasks from noodle toppings — bullet list
   if (fireTaskTops.length>0) {
     var ftMerged={};
     for(var i=0;i<fireTaskTops.length;i++){var fs=shorten(fireTaskTops[i]);ftMerged[fs]=(ftMerged[fs]||0)+1;}
-    fireLines.push('配料：');
+    fireLines.push('加料：');
     Object.keys(ftMerged).forEach(function(k){fireLines.push('• '+k+(ftMerged[k]>1?' ×'+ftMerged[k]:''));});
   }
   if (rmk) fireLines.push('📝 '+rmk);
@@ -981,10 +988,29 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
       if(i < byStation['noodle'].length-1) noodleLines.push('');
     }
   }
+  // [3][4][5] Cross-routed items from fire station → noodle station
+  if(noodleTaskItems&&noodleTaskItems.length>0){
+    var dryNoodles=[], snacks=[];
+    for(var i=0;i<noodleTaskItems.length;i++){
+      if(noodleTaskItems[i].type==='noodle') dryNoodles.push(noodleTaskItems[i]);
+      else if(noodleTaskItems[i].type==='snack') snacks.push(noodleTaskItems[i]);
+    }
+    if(dryNoodles.length>0){
+      for(var i=0;i<dryNoodles.length;i++){
+        var dl=dryNoodles[i].label.indexOf('乾撈')>-1?'撈麵':
+               dryNoodles[i].label.indexOf('脆麵')>-1?'脆麵':dryNoodles[i].label;
+        noodleLines.push(dl+(dryNoodles[i].qty>1?' ×'+dryNoodles[i].qty:''));
+      }
+    }
+    if(snacks.length>0){
+      noodleLines.push('小食：');
+      for(var i=0;i<snacks.length;i++){
+        noodleLines.push('• '+snacks[i].label+(snacks[i].qty>1?' ×'+snacks[i].qty:''));
+      }
+    }
+  }
   if (rmk) noodleLines.push('📝 '+rmk);
   noodleLines.push('─────────');
-
-  // ── 🥤 WATER BAR ──
   var waterLines = [header, '🥤 水吧', divider];
   if (byStation['water'] && byStation['water'].length) {
     for (var i=0;i<byStation['water'].length;i++){
@@ -1032,7 +1058,7 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
     combined = combined.concat(fireLines.slice(3, fireLines.length-1));
     combined.push('');
   }
-  if (byStation['noodle']&&byStation['noodle'].length) {
+  if (byStation['noodle']&&byStation['noodle'].length||(noodleTaskItems&&noodleTaskItems.length>0)) {
     combined.push('🍜 麵位');
     combined = combined.concat(noodleLines.slice(3, noodleLines.length-1));
     combined.push('');
@@ -1078,20 +1104,48 @@ function sendOrder(){
   var byStation={};
   var fireTaskTops=[];
   var waterTaskNotes=[];
+  var noodleTaskItems=[]; // cross-routed items that noodle station also needs to see
 
   for(var i=0;i<cart.length;i++){
     var it=cart[i];
     if(!byStation[it.st]) byStation[it.st]=[];
     byStation[it.st].push({zh:it.zh,en:it.en,p:it.p,qty:it.qty,mods:it.mods,structured:it.structured||null});
+
+    // Noodle toppings → fire station notification
     if(it.st==='noodle'&&it.fireTops&&it.fireTops.length>0){
       fireTaskTops = fireTaskTops.concat(it.fireTops);
     }
+    // [2] 五香牛腩 is isExtra but NOT isFire in TOPPINGS, but must also notify fire
+    if(it.st==='noodle'&&it.structured&&it.structured.tops){
+      for(var j=0;j<it.structured.tops.length;j++){
+        if(it.structured.tops[j]==='五香牛腩'&&fireTaskTops.indexOf('五香牛腩')<0){
+          fireTaskTops.push('五香牛腩');
+        }
+      }
+    }
+
+    // Water notes
     if((it.st==='fire'||it.st==='noodle')&&it.waterNotes&&it.waterNotes.length>0){
       waterTaskNotes.push({notes:it.waterNotes,from:it.st});
     }
+
+    // [3][4] Dry noodle (Set E or single order) → also notify noodle station
+    var isDryNoodle=false;
+    if(it.structured&&it.structured.noodleType&&it.structured.noodleType.indexOf('乾撈')>-1) isDryNoodle=true;
+    if(it.structured&&it.structured.noodleType&&it.structured.noodleType.indexOf('脆麵')>-1) isDryNoodle=true;
+    if(it.zh==='脆麵/乾撈麵') isDryNoodle=true;
+    if(isDryNoodle&&it.st==='fire'){
+      var noodleLabel=it.structured&&it.structured.noodleType?it.structured.noodleType:'撈麵';
+      noodleTaskItems.push({type:'noodle',label:noodleLabel,qty:it.qty,src:it.zh});
+    }
+
+    // [5] Snack 牛肉丸 (6粒) → also notify noodle station
+    if(it.st==='fire'&&it.zh==='牛肉丸 (6粒)'){
+      noodleTaskItems.push({type:'snack',label:'牛丸',qty:it.qty,src:it.zh});
+    }
   }
 
-  var fullMsg = buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, currentTable, no, rmk, tot);
+  var fullMsg = buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, currentTable, no, rmk, tot, noodleTaskItems);
 
   // Copy to clipboard then open the group
   copyToClipboard(fullMsg).then(function(){

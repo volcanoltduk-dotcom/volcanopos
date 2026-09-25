@@ -502,12 +502,13 @@ function renderModal() {
       }
       h+='</div></div>';
     } else {
-      var md=MODS[mk]; if(!md) continue;
+      var resolvedMk = mk === 'NOODLE_TYPE' ? 'noodle_type' : mk;
+      var md=MODS[resolvedMk]; if(!md) continue;
       h+='<div class="mod-group"><div class="mod-label">'+md.label+'</div><div class="mod-opts">';
       for(var oi=0;oi<md.opts.length;oi++){
         var sv=md.opts[oi].replace(/"/g,'&quot;');
         var dp=(md.prices&&md.prices[oi]!=null)?md.prices[oi]:0;
-        h+='<div class="mod-opt" data-key="'+mk+'" data-val="'+sv+'" data-drinkprice="'+dp+'" data-sel="'+sc+'" onclick="selOpt(this)">'+md.opts[oi]+'</div>';
+        h+='<div class="mod-opt" data-key="'+resolvedMk+'" data-val="'+sv+'" data-drinkprice="'+dp+'" data-sel="'+sc+'" onclick="selOpt(this)">'+md.opts[oi]+'</div>';
       }
       h+='</div></div>';
     }
@@ -618,7 +619,7 @@ function confirmMod(){
     else if(k==='icecream') toastFilling=v;
     else if(k==='noodle_type'){
       noodleNoodleType=v;
-      extraPrice+=dp;  // dp = 0 / 0.5 / 1.0 per option
+      // dp already added by the general extraPrice+=dp above — do NOT add again
     }
     else if(k==='setf_side') setfSide=v;
     else if(k==='milk_temp') milkTemp=v;

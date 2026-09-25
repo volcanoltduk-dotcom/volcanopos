@@ -286,6 +286,7 @@ var ROUTING = {
   '五香牛展 Five Spice Beef Shin':                 ['noodle'],
   // Noodle toppings that also notify fire
   '炸魚春卷 Fried Fish Spring Roll':               ['noodle','fire'],
+  '魚春卷 Fish Spring Roll':                        ['noodle'],  // plain version — noodle only
   '辣椒孜然雞翼 Spicy Cumin Chicken Wings':        ['noodle','fire'],
   '鹵水雞翼 Braised Chicken Wings':                ['noodle','fire'],
   '炸雞腿 Deep Fried Chicken Leg':                 ['noodle','fire'],
@@ -304,6 +305,7 @@ var TOPPINGS = [
   {name:'招牌火山牛丸 Signature Volcano Beef Ball',       isExtra:false, extraAmt:0},
   {name:'辣椒孜然雞翼 Spicy Cumin Chicken Wings',         isExtra:true,  extraAmt:1},
   {name:'鮮蝦雞肉雲吞 Fresh Shrimp & Chicken Wonton',    isExtra:false, extraAmt:0},
+  {name:'魚春卷 Fish Spring Roll',                         isExtra:false, extraAmt:0},  // plain — noodle only, no fire
   {name:'炸魚春卷 Fried Fish Spring Roll',                isExtra:true,  extraAmt:1},
   {name:'五香牛腩牛展 Five Spice Beef Brisket with Tendon',isExtra:true, extraAmt:2},
   {name:'五香牛展 Five Spice Beef Shin',                  isExtra:false, extraAmt:0},
@@ -747,6 +749,7 @@ var SHORT_NAMES = {
   '招牌火山牛丸 Signature Volcano Beef Ball':     '牛丸',
   '辣椒孜然雞翼 Spicy Cumin Chicken Wings':       '孜然雞翼',
   '鮮蝦雞肉雲吞 Fresh Shrimp & Chicken Wonton':  '雲吞',
+  '魚春卷 Fish Spring Roll':                              '魚春卷',
   '炸魚春卷 Fried Fish Spring Roll':              '炸魚春卷',
   '五香牛腩牛展 Five Spice Beef Brisket with Tendon':'牛腩牛展',
   '五香牛展 Five Spice Beef Shin':                '牛展',
@@ -1098,9 +1101,14 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
     var wt=waterTaskNotes[i];
     var drinkName='';
     var m2={sugar:'',ice:'',milk:'',size:''};
+    var drinkTopLine='';  // collect 配料 from waterNotes
     for(var j=0;j<wt.notes.length;j++){
       var n=wt.notes[j];
-      if(SHORT_NAMES[n]){drinkName=SHORT_NAMES[n];}
+      if(n.indexOf('配料：')===0||n.indexOf('配料:')===0){
+        // Extract only drink toppings — exclude food toppings which look like "配料：牛丸、雲吞"
+        // drinkTops only contains DRINK_TOPPINGS names (Tapioca, Popping Ball, etc.)
+        drinkTopLine = n;
+      } else if(SHORT_NAMES[n]){drinkName=SHORT_NAMES[n];}
       else if(SUGAR_SHORT[n]){m2.sugar=SUGAR_SHORT[n];}
       else if(ICE_SHORT[n]){m2.ice=ICE_SHORT[n];}
       else if(n.indexOf('Oat')>-1){m2.milk='燕麥';}
@@ -1109,6 +1117,8 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
     if(drinkName){
       var prefix=wt.from==='fire'?'[套餐]':'[麵位]';
       waterLines.push(prefix+' '+formatDrinkLine(drinkName,m2));
+      // Output drink toppings on the next line if present
+      if(drinkTopLine) waterLines.push(drinkTopLine);
     }
   }
   if (rmk) waterLines.push('📝 '+rmk);

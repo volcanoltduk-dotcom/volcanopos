@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -52,7 +52,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .mitem .en{font-size:10px;color:var(--text3);margin-top:1px;line-height:1.3}
 .mitem .pr{font-size:12px;font-weight:500;color:var(--text2);margin-top:4px}
 .mitem.paused{opacity:.42;position:relative}
-.mitem.paused::after{content:'暫停';position:absolute;top:5px;right:7px;font-size:9px;font-weight:700;color:#fff;background:#c0392b;border-radius:4px;padding:1px 5px}
+.mitem.paused::after{content:'Paused';position:absolute;top:5px;right:7px;font-size:9px;font-weight:700;color:#fff;background:#c0392b;border-radius:4px;padding:1px 5px}
 .cart-area{background:var(--card);border-top:1px solid var(--border);padding:10px 12px;flex-shrink:0;max-height:44vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .cart-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .cart-title{font-size:13px;font-weight:600;color:var(--text)}
@@ -129,6 +129,11 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .history-time{font-size:11px;color:var(--text3)}
 .history-tot{font-size:13px;font-weight:700;color:var(--text)}
 .history-items{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5}
+.req{color:#c0392b;font-weight:700}
+.modal-err{display:none;background:#fdecea;color:#a1261a;border:1px solid #e0a8a2;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:600;margin-top:10px}
+.csum{font-size:10px;color:var(--text3);margin-top:1px;line-height:1.4}
+.history-items div{margin-bottom:3px}
+.history-items .hsub{color:var(--text3);font-size:10px;padding-left:8px}
 </style>
 </head>
 <body>
@@ -138,9 +143,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   <div class="topbar">
     <div class="logo">🌋 <em>VOLCANO</em> POS</div>
     <div class="vtabs">
-      <button class="vtab on" id="vv-order" onclick="vswitch('order')">落單</button>
-      <button class="vtab" id="vv-history" onclick="vswitch('history')">歷史</button>
-      <button class="vtab" onclick="openManage()">管理</button>
+      <button class="vtab on" id="vv-order" onclick="vswitch('order')">Order</button>
+      <button class="vtab" id="vv-history" onclick="vswitch('history')">History</button>
+      <button class="vtab" onclick="openManage()">Manage</button>
     </div>
   </div>
 
@@ -148,16 +153,16 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   <div class="view on" id="view-order">
     <div class="table-bar">
       <div class="table-row1">
-        <span class="table-label">🪑 枱號 Table</span>
-        <input class="tno-custom" id="tno-custom" type="text" inputmode="numeric" placeholder="其他" oninput="setTableCustom(this.value)">
+        <span class="table-label">🪑 Table</span>
+        <input class="tno-custom" id="tno-custom" type="text" inputmode="numeric" placeholder="Other" oninput="setTableCustom(this.value)">
         <span id="cur-table-display" style="font-size:12px;font-weight:700;color:var(--fire);margin-left:4px"></span>
       </div>
       <div class="table-scroll" id="table-scroll"></div>
     </div>
     <div class="station-tabs">
-      <button class="stab on-water" id="tb-water" onclick="stabSwitch('water')">💧 水吧<br>Water Bar</button>
-      <button class="stab" id="tb-fire" onclick="stabSwitch('fire')">🔥 火位<br>Hot Station</button>
-      <button class="stab" id="tb-noodle" onclick="stabSwitch('noodle')">🍜 麵位<br>Noodle Bar</button>
+      <button class="stab on-water" id="tb-water" onclick="stabSwitch('water')">💧 Drinks<br>Station</button>
+      <button class="stab" id="tb-fire" onclick="stabSwitch('fire')">🔥 Fire<br>Station</button>
+      <button class="stab" id="tb-noodle" onclick="stabSwitch('noodle')">🍜 Noodle<br>Station</button>
     </div>
     <div class="order-body">
       <div class="menu-scroll">
@@ -167,19 +172,19 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
       </div>
       <div class="cart-area">
         <div class="cart-hd">
-          <span class="cart-title">當前訂單 Current Order</span>
-          <button class="clr-btn" onclick="clearCart()">清除 Clear</button>
+          <span class="cart-title">Current Order</span>
+          <button class="clr-btn" onclick="clearCart()">Clear</button>
         </div>
-        <div id="cart-list"><div class="empty-msg">請選擇項目 Select items above</div></div>
+        <div id="cart-list"><div class="empty-msg">Select items above</div></div>
         <div id="cart-foot" style="display:none">
           <div class="cart-foot-inner">
-            <div class="table-warn" id="table-warn">⚠️ 請先選擇枱號 Please select a table</div>
-            <input class="rmk" id="rmk" placeholder="備注 Remarks（特別要求…）">
+            <div class="table-warn" id="table-warn">⚠️ Please select a table</div>
+            <input class="rmk" id="rmk" placeholder="Order note (special requests…)">
             <div class="total-row">
-              <span class="total-lbl">合計 Total</span>
+              <span class="total-lbl">Total</span>
               <span class="total-amt" id="tot">£0.00</span>
             </div>
-            <button class="send-btn" onclick="sendOrder()">📲 落單（複製內容＋開 WhatsApp 群組）</button>
+            <button class="send-btn" onclick="sendOrder()">📲 Place order (copy message + open WhatsApp group)</button>
           </div>
         </div>
       </div>
@@ -189,7 +194,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   <!-- HISTORY VIEW -->
   <div class="view" id="view-history">
     <div class="station-view-body" style="flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch" id="history-body">
-      <div class="no-orders">暫無歷史訂單</div>
+      <div class="no-orders">No order history yet</div>
     </div>
   </div>
 </div>
@@ -205,1149 +210,1009 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 </div>
 
 <script>
-// ─────────────────────────────────────────
-// WHATSAPP GROUP LINK (single group for all stations)
-// ─────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════
+// VOLCANO POS — script
+// Data layer: every option has a stable `id`. Kitchen routing, pricing
+// and WhatsApp messages are driven by ids / structured data, never by
+// display names or reconstructed display strings.
+// ═════════════════════════════════════════════════════════════
+
+// WhatsApp group (unchanged)
 var WA_GROUP_LINK = 'https://chat.whatsapp.com/IP4B7ppeDRDJfS5V4PilIf?s=hd&p=i&mlu=4&ilr=4';
 
+var STATION_NAME = {water:'Drinks Station', fire:'Fire Station', noodle:'Noodle Station'};
+var STATION_ICON = {water:'💧', fire:'🔥', noodle:'🍜'};
+
+// ── Runtime state ──
 var MENU_ITEMS = [];
 var cart = [];
 var orderHistory = [];
 var oNo = 1;
-var pendingItem = null;
-var custSel = {};
-var selToppings = [];
-var selDrinkToppings = [];
+var pendingItem = null;     // menu item currently open in the modal
+var custSel = {};           // simple single-choice selections: {side, sauce, toast, rice_sauce, spice, noodle_type}
+var selToppings = [];       // noodle toppings: [{id}]
+var selGarnish = [];        // garnish ids
+var drinkSel = null;        // drink being configured in the modal (independent per modal session)
 var currentTable = '';
-var pausedItems = {};
-var selGarnish = [];
+var pausedItems = {};       // keyed by menu item id (not array index)
 
-// ── DRINK / TOPPING DATA ──
-// SET_DRINKS: 500ml included; upgrade 700ml +£1; Matcha +£1 extra; Soft Drink flat £2 no upgrade
-var SET_DRINKS = [
-  {label:'台式珍珠奶茶',        price:0},
-  {label:'黑糖珍珠奶茶',        price:0},
-  {label:'朱古力珍珠奶茶',      price:0},
-  {label:'椰奶紅豆奶茶',        price:0},
-  {label:'芒果果茶',            price:0},
-  {label:'荔枝果茶',            price:0},
-  {label:'白桃果茶',            price:0},
-  {label:'檸檬果茶',            price:0},
-  {label:'抹茶紅豆拿鐵 +£1',   price:1},
-  {label:'軟飲 Soft Drink',     price:0}
+// ── Drink option lists (exactly five sugar + five ice levels; ids are unique per list) ──
+var SUGAR_OPTS = [
+  {id:'more',   label:'More Sugar'},
+  {id:'normal', label:'Normal Sugar'},
+  {id:'half',   label:'Half Sugar'},
+  {id:'less',   label:'Less Sugar'},
+  {id:'none',   label:'No Sugar'}
 ];
-// NOODLE add-on drinks: bubble tea +£2, matcha +£3, soft drink +£1
-var NOODLE_DRINKS = [
-  {label:'不加',                    price:0},
-  {label:'台式珍珠奶茶 +£2',        price:2},
-  {label:'黑糖珍珠奶茶 +£2',        price:2},
-  {label:'朱古力珍珠奶茶 +£2',      price:2},
-  {label:'椰奶紅豆奶茶 +£2',        price:2},
-  {label:'芒果果茶 +£2',            price:2},
-  {label:'荔枝果茶 +£2',            price:2},
-  {label:'白桃果茶 +£2',            price:2},
-  {label:'檸檬果茶 +£2',            price:2},
-  {label:'抹茶紅豆拿鐵 +£3',        price:3},
-  {label:'軟飲 Soft Drink +£1',      price:1}
+var ICE_OPTS = [
+  {id:'more',   label:'More Ice'},
+  {id:'normal', label:'Normal Ice'},
+  {id:'half',   label:'Half Ice'},
+  {id:'less',   label:'Less Ice'},
+  {id:'none',   label:'No Ice'}
 ];
-var SUGAR_OPTS = ['多糖','正常','少糖','半糖','無糖'];
-var ICE_OPTS   = ['多冰','正常','少冰','無冰 No Ice'];
-var MILK_OPTS  = ['全脂奶 Whole Milk','燕麥奶 Oat Drink'];
-// Drink toppings per new menu; first included, extra +£0.50 each
+var MILK_OPTS = [
+  {id:'whole', label:'Whole Milk'},
+  {id:'oat',   label:'Oat Drink'}
+];
+var TEMP_OPTS = [
+  {id:'cold', label:'Cold'},
+  {id:'hot',  label:'Hot'}
+];
 var DRINK_TOPPINGS = [
-  '珍珠 Tapioca',
-  '紅豆 Red Bean',
-  '荔枝爆珠 Lychee Popping Ball',
-  '蜜桃爆珠 Peach Popping Ball',
-  '士多啤梨爆珠 Strawberry Popping Ball',
-  '芒果爆珠 Mango Popping Ball'
+  {id:'tapioca',        label:'Tapioca'},
+  {id:'red_bean',       label:'Red Bean'},
+  {id:'lychee_pop',     label:'Lychee Popping Ball'},
+  {id:'peach_pop',      label:'Peach Popping Ball'},
+  {id:'strawberry_pop', label:'Strawberry Popping Ball'},
+  {id:'mango_pop',      label:'Mango Popping Ball'}
 ];
+var DRINK_TOPPING_EXTRA = 0.5;   // per additional topping scoop
 
-// ─────────────────────────────────────────
-// CENTRALISED ROUTING TABLE
-// Keys must exactly match TOPPINGS name or menu zh name
-// Values = stations that receive the item
-// Default (not listed) = stays in its own station only
-// ─────────────────────────────────────────
-var ROUTING = {
-  // Noodle-only toppings
-  '招牌火山牛丸 Signature Volcano Beef Ball':       ['noodle'],
-  '鮮蝦雞肉雲吞 Fresh Shrimp & Chicken Wonton':    ['noodle'],
-  '魚蛋 Fish Ball':                                ['noodle'],
-  '芝士魚豆腐 Cheese Fish Tofu':                   ['noodle'],
-  '墨魚丸 Cuttlefish Ball':                        ['noodle'],
-  '肥牛 Beef Slices':                              ['noodle'],
-  '豆卜 Bean Curd Puff':                           ['noodle'],
-  '腐皮 Bean Curd Sheet':                          ['noodle'],
-  '芽菜 Bean Sprouts':                             ['noodle'],
-  '酸菜 Pickled Mustard Greens':                   ['noodle'],
-  '鹵水蛋 Braised Egg':                            ['noodle'],
-  '鹵水豆腐 Braised Tofu':                         ['noodle'],
-  '五香牛展 Five Spice Beef Shin':                 ['noodle'],
-  // Noodle toppings that also notify fire
-  '炸魚春卷 Fried Fish Spring Roll':               ['noodle','fire'],
-  '魚春卷 Fish Spring Roll':                        ['noodle'],  // plain version — noodle only
-  '辣椒孜然雞翼 Spicy Cumin Chicken Wings':        ['noodle','fire'],
-  '鹵水雞翼 Braised Chicken Wings':                ['noodle','fire'],
-  '炸雞腿 Deep Fried Chicken Leg':                 ['noodle','fire'],
-  '五香牛腩牛展 Five Spice Beef Brisket with Tendon':['noodle','fire'],
-  // Fire items cross-routed to noodle
-  '牛肉丸 (6粒)': ['fire','noodle']
-};
-
-function routesToFire(name) { var r=ROUTING[name]; return r&&r.indexOf('fire')>-1; }
-function routesToNoodle(name) { var r=ROUTING[name]; return r&&r.indexOf('noodle')>-1; }
-
-// TOPPINGS for noodle bowl
-// isExtra: has surcharge on top of per-topping +£2
-// extraAmt: the surcharge amount
-var TOPPINGS = [
-  {name:'招牌火山牛丸 Signature Volcano Beef Ball',       isExtra:false, extraAmt:0},
-  {name:'辣椒孜然雞翼 Spicy Cumin Chicken Wings',         isExtra:true,  extraAmt:1},
-  {name:'鮮蝦雞肉雲吞 Fresh Shrimp & Chicken Wonton',    isExtra:false, extraAmt:0},
-  {name:'魚春卷 Fish Spring Roll',                         isExtra:false, extraAmt:0},  // plain — noodle only, no fire
-  {name:'炸魚春卷 Fried Fish Spring Roll',                isExtra:true,  extraAmt:1},
-  {name:'五香牛腩牛展 Five Spice Beef Brisket with Tendon',isExtra:true, extraAmt:2},
-  {name:'五香牛展 Five Spice Beef Shin',                  isExtra:false, extraAmt:0},
-  {name:'酸菜 Pickled Mustard Greens',                    isExtra:false, extraAmt:0},
-  {name:'鹵水雞翼 Braised Chicken Wings',                 isExtra:false, extraAmt:0},
-  {name:'炸雞腿 Deep Fried Chicken Leg',                  isExtra:true,  extraAmt:3},
-  {name:'魚蛋 Fish Ball',                                 isExtra:false, extraAmt:0},
-  {name:'芝士魚豆腐 Cheese Fish Tofu',                    isExtra:false, extraAmt:0},
-  {name:'墨魚丸 Cuttlefish Ball',                         isExtra:false, extraAmt:0},
-  {name:'肥牛 Beef Slices',                               isExtra:false, extraAmt:0},
-  {name:'豆卜 Bean Curd Puff',                            isExtra:false, extraAmt:0},
-  {name:'腐皮 Bean Curd Sheet',                           isExtra:false, extraAmt:0},
-  {name:'芽菜 Bean Sprouts',                              isExtra:false, extraAmt:0},
-  {name:'鹵水蛋 Braised Egg',                             isExtra:false, extraAmt:0},
-  {name:'鹵水豆腐 Braised Tofu',                          isExtra:false, extraAmt:0}
+// ── Drink definitions ──
+// type: milktea | fruittea | matcha | soft
+var DRINK_LIST = [
+  {id:'tw_milk_tea',      name:'Taiwanese Milk Tea',     menuName:'Taiwanese Milk Tea with Tapioca',   type:'milktea',  includes:'Tapioca'},
+  {id:'bs_milk_tea',      name:'Brown Sugar Milk Tea',   menuName:'Brown Sugar Milk Tea with Tapioca', type:'milktea',  includes:'Tapioca'},
+  {id:'choc_milk_tea',    name:'Chocolate Milk Tea',     menuName:'Chocolate Milk Tea with Tapioca',   type:'milktea',  includes:'Tapioca'},
+  {id:'coconut_milk_tea', name:'Coconut Milk Tea',       menuName:'Coconut Milk Tea with Red Bean',    type:'milktea',  includes:'Red Bean'},
+  {id:'mango_tea',        name:'Mango Fruit Tea',        menuName:'Mango Fruit Tea',                   type:'fruittea', includes:'a popping ball'},
+  {id:'lychee_tea',       name:'Lychee Fruit Tea',       menuName:'Lychee Fruit Tea',                  type:'fruittea', includes:'a popping ball'},
+  {id:'peach_tea',        name:'White Peach Fruit Tea',  menuName:'White Peach Fruit Tea',             type:'fruittea', includes:'a popping ball'},
+  {id:'lemon_tea',        name:'Lemon Fruit Tea',        menuName:'Lemon Fruit Tea',                   type:'fruittea', includes:'a popping ball'},
+  {id:'matcha',           name:'Matcha Latte with Red Bean', menuName:'Matcha Latte with Red Bean',    type:'matcha',   includes:'Red Bean'},
+  {id:'soft',             name:'Soft Drink',             menuName:'Soft Drink',                        type:'soft',     includes:''}
 ];
+var DRINKS = {};
+DRINK_LIST.forEach(function(d){ DRINKS[d.id] = d; });
 
-var GARNISH_OPTS = [
-  {label:'多葱',price:0},{label:'走葱',price:0},
-  {label:'多芫茜',price:0},{label:'走芫茜',price:0},
-  {label:'走芽菜',price:0},{label:'走腐皮',price:0},
-  {label:'加底 +£1',price:1}
-];
-
+// ── Simple option groups (single choice). `req` = must be chosen. ──
 var MODS = {
-  sugar:      {label:'糖度 Sugar',           opts:SUGAR_OPTS},
-  ice:        {label:'冰度 Ice',             opts:ICE_OPTS},
-  milk:       {label:'奶類 Milk',            opts:MILK_OPTS},
-  side:       {label:'主食 Side',            opts:['白飯 Rice','薯條 Chips']},
-  sauce:      {label:'醬汁 Sauce',           opts:['日式咖喱 Japanese Curry','照燒 Teriyaki']},
-  toast:      {label:'西多士餡料 Filling',   opts:['花生醬 Peanut Butter','Nutella','開心果 Pistachio']},
-  rice_sauce: {label:'加醬汁 Add Sauce (+£1)',opts:['不加','日式咖喱 +£1','照燒 +£1']},
-  noodle_type:{label:'麵底 Noodle Type',opts:['米線 Rice Noodle','烏冬 Udon +£0.50','韓國即食麵 Korean Instant Noodles +£1.00'],prices:[0,0.5,1.0]},
-  spice:      {label:'辣度 Spice',           opts:['小辣 Mild','中辣 Medium','大辣 Hot']},
-  milk_temp:  {label:'溫度 Temperature',     opts:['凍 Cold','熱 Hot']}
+  side:  {label:'Side', req:true,  opts:[{id:'rice', label:'Rice'}, {id:'chips', label:'Chips'}]},
+  sauce: {label:'Sauce', req:true, opts:[{id:'curry', label:'Japanese Curry'}, {id:'teriyaki', label:'Teriyaki'}]},
+  toast: {label:'Filling', req:true, opts:[
+    {id:'peanut',   label:'Peanut Butter'},
+    {id:'nutella',  label:'Nutella'},
+    {id:'pistachio',label:'Pistachio'}
+  ]},
+  rice_sauce: {label:'Extra sauce', req:false, opts:[
+    {id:'none',     label:'No Extra Sauce', price:0},
+    {id:'curry',    label:'Japanese Curry', price:1},
+    {id:'teriyaki', label:'Teriyaki',       price:1}
+  ]},
+  noodle_type: {label:'Noodle base', req:true, opts:[
+    {id:'rice',   label:'Rice Noodles',          price:0},
+    {id:'udon',   label:'Udon',                  price:0.5},
+    {id:'korean', label:'Korean Instant Noodles',price:1}
+  ]},
+  spice: {label:'Spice level', req:false, opts:[
+    {id:'none',   label:'No Spice'},
+    {id:'mild',   label:'Mild'},
+    {id:'medium', label:'Medium'},
+    {id:'hot',    label:'Hot'}
+  ]}
 };
 
+// ── Noodle toppings (first one included; each additional +£2.00; `sur` = item surcharge, always charged) ──
+var TOPPINGS = [
+  {id:'beef_ball',       name:'Signature Volcano Beef Ball',         sur:0},
+  {id:'shrimp_wonton',   name:'Fresh Shrimp & Chicken Wonton',       sur:0},
+  {id:'cheese_fish_tofu',name:'Cheese Fish Tofu',                    sur:0},
+  {id:'fish_ball',       name:'Fish Ball',                           sur:0},
+  {id:'cuttlefish_ball', name:'Cuttlefish Ball',                     sur:0},
+  {id:'beef_slices',     name:'Beef Slices',                         sur:0},
+  {id:'beef_shin',       name:'Five-Spice Beef Shin',                sur:0},
+  {id:'braised_tofu',    name:'Braised Tofu',                        sur:0},
+  {id:'braised_wings',   name:'Braised Chicken Wings',               sur:0},
+  {id:'braised_egg',     name:'Braised Egg',                         sur:0},
+  {id:'bean_curd_puff',  name:'Bean Curd Puff',                      sur:0},
+  {id:'bean_curd_sheet', name:'Bean Curd Sheet',                     sur:0},
+  {id:'bean_sprouts',    name:'Bean Sprouts',                        sur:0},
+  {id:'pickled_mustard', name:'Pickled Mustard Greens',              sur:0},
+  {id:'cumin_wings',     name:'Spicy Cumin Chicken Wings',           sur:1},
+  {id:'fish_spring_roll',name:'Fish Spring Roll',                    sur:0},
+  {id:'fried_fish_roll', name:'Fried Fish Spring Roll',              sur:1},
+  {id:'beef_brisket',    name:'Five-Spice Beef Brisket with Tendon', sur:2},
+  {id:'chicken_leg',     name:'Deep-Fried Chicken Leg',              sur:3}
+];
+var TOPPING_EXTRA = 2;   // each additional topping
+
+// ── Kitchen routing, keyed by topping id. 'noodle' always receives the full bowl;
+//    'fire' means Fire Station must also prepare that topping. ──
+var ROUTING = {
+  beef_ball:['noodle'], shrimp_wonton:['noodle'], cheese_fish_tofu:['noodle'], fish_ball:['noodle'],
+  cuttlefish_ball:['noodle'], beef_slices:['noodle'], bean_curd_puff:['noodle'], bean_curd_sheet:['noodle'],
+  bean_sprouts:['noodle'], pickled_mustard:['noodle'], fish_spring_roll:['noodle'],
+  beef_shin:['noodle','fire'], braised_tofu:['noodle','fire'], braised_wings:['noodle','fire'], braised_egg:['noodle','fire'],
+  cumin_wings:['noodle','fire'], fried_fish_roll:['noodle','fire'], beef_brisket:['noodle','fire'], chicken_leg:['noodle','fire']
+};
+function routesToFire(id){ var r = ROUTING[id]; return !!(r && r.indexOf('fire') > -1); }
+function routesToNoodle(id){ var r = ROUTING[id]; return !!(r && r.indexOf('noodle') > -1); }
+
+// ── Garnish options (mutually exclusive within a `group`). `needs` = only offered if the soup includes it. ──
+var GARNISH_OPTS = [
+  {id:'no_spring_onion',    label:'No Spring Onion',    group:'spring_onion',    needs:'Spring Onion'},
+  {id:'extra_spring_onion', label:'Extra Spring Onion', group:'spring_onion'},
+  {id:'no_coriander',       label:'No Coriander',       group:'coriander',       needs:'Coriander'},
+  {id:'extra_coriander',    label:'Extra Coriander',    group:'coriander'},
+  {id:'no_bean_sprouts',    label:'No Bean Sprouts',    group:'bean_sprouts',    needs:'Bean Sprouts'},
+  {id:'no_bean_curd_sheet', label:'No Bean Curd Sheet', group:'bean_curd_sheet', needs:'Bean Curd Sheet'},
+  {id:'extra_noodles',      label:'Extra Noodles',      group:'extra_noodles',   price:1}
+];
+
+// ── Menu ──
+function drinkItem(id){
+  var d = DRINKS[id];
+  return {id:id, st:'water', name:d.menuName, desc:'', p:(d.type==='soft'?2:(d.type==='matcha'?5:4)),
+          mods:(d.type==='soft'?[]:['DRINK_CUSTOM']), drink:id};
+}
 var MENU = {
   water:{sections:[
-    {t:'奶茶 Milk Tea (500ml £4 / 700ml £5)',items:[
-      {zh:'台式珍珠奶茶', en:'Taiwanese Milk Tea with Tapioca',   p:4, mods:['milk_temp','DRINK_CUSTOM']},
-      {zh:'黑糖珍珠奶茶', en:'Brown Sugar Milk Tea with Tapioca', p:4, mods:['milk_temp','DRINK_CUSTOM']},
-      {zh:'朱古力珍珠奶茶',en:'Chocolate Milk Tea with Tapioca', p:4, mods:['milk_temp','DRINK_CUSTOM']},
-      {zh:'椰奶紅豆奶茶', en:'Coconut Milk Tea with Red Bean',    p:4, mods:['milk_temp','DRINK_CUSTOM']}
-    ]},
-    {t:'水果茶 Fruit Tea with Popping Ball (500ml £4 / 700ml £5)',items:[
-      {zh:'芒果果茶', en:'Mango Fruit Tea',       p:4, mods:['DRINK_CUSTOM_NO_MILK']},
-      {zh:'荔枝果茶', en:'Lychee Fruit Tea',      p:4, mods:['DRINK_CUSTOM_NO_MILK']},
-      {zh:'白桃果茶', en:'White Peach Fruit Tea', p:4, mods:['DRINK_CUSTOM_NO_MILK']},
-      {zh:'檸檬果茶', en:'Lemon Fruit Tea',       p:4, mods:['DRINK_CUSTOM_NO_MILK']}
-    ]},
-    {t:'抹茶紅豆拿鐵 Matcha Latte with Red Bean (500ml £5 / Hot 350ml)',items:[
-      {zh:'抹茶紅豆拿鐵', en:'Matcha Latte with Red Bean', p:5, mods:['milk_temp','DRINK_CUSTOM']}
-    ]},
-    {t:'軟飲 Soft Drink',items:[
-      {zh:'軟飲 Soft Drink', en:'Soft Drink', p:2, mods:[]}
-    ]}
+    {t:'Milk Tea — 500ml £4.00 / 700ml £5.00',
+     items:['tw_milk_tea','bs_milk_tea','choc_milk_tea','coconut_milk_tea'].map(drinkItem)},
+    {t:'Fruit Tea with Popping Ball — 500ml £4.00 / 700ml £5.00',
+     items:['mango_tea','lychee_tea','peach_tea','lemon_tea'].map(drinkItem)},
+    {t:'Matcha — 500ml £5.00 (Hot 350ml)', items:['matcha'].map(drinkItem)},
+    {t:'Soft Drink — £2.00', items:['soft'].map(drinkItem)}
   ]},
   fire:{sections:[
-    {t:'套餐 Set Meals（含 500ml 飲品，升 700ml +£1）',items:[
-      {zh:'炸雞翼套餐',       en:'Crispy Chicken Wing Set (2 pcs)',           p:9.5,  mods:['side','sauce','SET_DRINK']},
-      {zh:'照燒豆腐套餐',     en:'Teriyaki Soya Tofu Set (Vegan)',            p:9.5,  mods:['side','SET_DRINK']},
-      {zh:'五香牛腩牛展套餐', en:'Five Spice Beef Brisket with Tendon Set',   p:11.0, mods:['side','SET_DRINK']},
-      {zh:'炸雞腿套餐',       en:'Deep-Fried Chicken Leg Set',               p:11.0, mods:['side','sauce','SET_DRINK']}
+    {t:'Set Meals — includes salad + a 500ml drink (700ml +£1.00)', items:[
+      {id:'set_wings',   st:'fire', name:'Crispy Chicken Wings Set',               desc:'2 pcs · rice or chips + salad · drink included',        p:9.5,  mods:['side','sauce','SET_DRINK']},
+      {id:'set_tofu',    st:'fire', name:'Teriyaki Soya Tofu Set',                 desc:'Seaweed teriyaki tofu · rice or chips + salad · drink included', p:9.5,  mods:['side','SET_DRINK']},
+      {id:'set_brisket', st:'fire', name:'Five-Spice Beef Brisket with Tendon Set',desc:'Rice or chips + salad · drink included',                 p:11.0, mods:['side','SET_DRINK']},
+      {id:'set_leg',     st:'fire', name:'Deep-Fried Chicken Leg Set',             desc:'Rice or chips + salad · drink included',                 p:11.0, mods:['side','sauce','SET_DRINK']}
     ]},
-    {t:'小食 Appetizer',items:[
-      {zh:'炸雲吞 (6隻)',      en:'6 pcs Deep Fried Wonton (Chicken + Shrimp)', p:6.5, mods:[]},
-      {zh:'炸蠔 (4隻)',        en:'4 pcs Deep-Fried Breaded Oysters',            p:6.5, mods:[]},
-      {zh:'辣椒孜然雞翼 (5隻)',en:'5 pcs Spicy Cumin Chicken Wings',            p:5.0, mods:[]},
-      {zh:'照燒豆腐',          en:'Teriyaki Soya Tofu',                         p:6.0, mods:[]},
-      {zh:'椒鹽魷魚鬚',        en:'Salt & Pepper Squid Tentacles',              p:8.8, mods:[]},
-      {zh:'薯片',              en:'Seasoned Crisps',                            p:2.0, mods:[]},
-      {zh:'白飯',              en:'Steamed Rice',                               p:2.0, mods:['rice_sauce']},
-      {zh:'西多士',            en:'Hong Kong French Toast',                     p:4.0, mods:['toast']}
+    {t:'Appetizers', items:[
+      {id:'app_wonton',  st:'fire', name:'Deep-Fried Wontons (6 pcs, Chicken & Shrimp)', desc:'', p:6.5, mods:[]},
+      {id:'app_oysters', st:'fire', name:'Deep-Fried Breaded Oysters (4 pcs)',           desc:'', p:6.5, mods:[]},
+      {id:'app_cumin',   st:'fire', name:'Spicy Cumin Chicken Wings (5 pcs)',            desc:'', p:5.0, mods:[]},
+      {id:'app_squid',   st:'fire', name:'Salt & Pepper Squid Tentacles',                desc:'', p:8.8, mods:[]},
+      {id:'app_tofu',    st:'fire', name:'Teriyaki Soya Tofu',                           desc:'Appetizer', p:6.0, mods:[]},
+      {id:'app_crisps',  st:'fire', name:'Seasoned Crisps',                              desc:'', p:2.0, mods:[]},
+      {id:'app_rice',    st:'fire', name:'Steamed Rice',                                 desc:'Curry or teriyaki sauce +£1.00', p:2.0, mods:['rice_sauce']},
+      {id:'app_toast',   st:'fire', name:'Hong Kong French Toast',                       desc:'With golden syrup and butter', p:4.0, mods:['toast']}
     ]}
   ]},
   noodle:{sections:[
-    {t:'米線碗 Noodle Bowl £9.80（首款配料包含；其後每款+£2；部分配料另加）',items:[
-      {zh:'清湯米線',     en:'Chicken Broth',       p:9.8, mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']},
-      {zh:'酸辣湯米線',   en:'Hot & Sour Soup',     p:9.8, mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']},
-      {zh:'麻辣湯米線',   en:'Mala Soup',           p:9.8, mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']},
-      {zh:'酸麻辣湯米線', en:'Hot & Sour Mala Soup',p:9.8, mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']},
-      {zh:'蕃茄濃湯米線', en:'Tomato Soup',         p:9.8, mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']}
+    {t:'Build Your Noodle Bowl — £9.80 (1 topping included; each extra topping +£2.00)', items:[
+      {id:'soup_tomato',   st:'noodle', name:'Tomato Soup',          desc:'', p:9.8, defaults:null,
+        mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']},
+      {id:'soup_hs_mala',  st:'noodle', name:'Hot & Sour Mala Soup', desc:'', p:9.8,
+        defaults:['Pickled Mustard Greens','Bean Sprouts','Bean Curd Sheet','Coriander','Spring Onion','Spicy Minced Chicken'],
+        mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']},
+      {id:'soup_hs',       st:'noodle', name:'Hot & Sour Soup',      desc:'', p:9.8,
+        defaults:['Pickled Mustard Greens','Bean Sprouts','Bean Curd Sheet','Coriander','Spring Onion','Spicy Minced Chicken'],
+        mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']},
+      {id:'soup_mala',     st:'noodle', name:'Mala Soup',            desc:'', p:9.8,
+        defaults:['Bean Sprouts','Bean Curd Sheet','Coriander','Spring Onion','Spicy Minced Chicken'],
+        mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']},
+      {id:'soup_broth',    st:'noodle', name:'Chicken Broth',        desc:'', p:9.8,
+        defaults:['Bean Sprouts','Coriander','Spring Onion'],
+        mods:['spice','NOODLE_TYPE','TOPPINGS','GARNISH','NOODLE_DRINK']}
     ]}
   ]}
 };
 
+// ═════════════════════════════════════════════════════════════
+// HELPERS
+// ═════════════════════════════════════════════════════════════
+function r2(n){ return Math.round(n * 100) / 100; }
+function gbp(n){ return '£' + r2(n).toFixed(2); }
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function byId(list, id){
+  for (var i = 0; i < list.length; i++) { if (list[i].id === id) return list[i]; }
+  return null;
+}
+function labelOf(list, id){ var o = byId(list, id); return o ? o.label : ''; }
+function selClassFor(st){ return st === 'water' ? 'sel-w' : (st === 'fire' ? 'sel-f' : 'sel-n'); }
+function toppingName(id){ var t = byId(TOPPINGS, id); return t ? t.name : id; }
+function drinkToppingLabel(id){ return labelOf(DRINK_TOPPINGS, id) || id; }
+function drinkCtx(item){ return item.drink ? 'standalone' : (item.st === 'fire' ? 'set' : 'noodle'); }
 
-// ─────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════
+// DRINK RULES (single source of truth for sizes, temperatures, prices)
+// ═════════════════════════════════════════════════════════════
+// Which temperatures can be chosen. Hot is only offered for standalone milk tea / matcha.
+// (Hot with set meals / noodle bowls is not stated on the menu → not offered; flagged for confirmation.)
+function drinkTemps(def, ctx){
+  if (def.type === 'soft' || def.type === 'fruittea') return [];
+  return (ctx === 'standalone') ? ['cold', 'hot'] : ['cold'];
+}
+function drinkSizes(def, temp){
+  if (def.type === 'soft') return [];
+  if (def.type === 'matcha')  return temp === 'hot' ? [350] : [500];
+  if (def.type === 'milktea') return temp === 'hot' ? [350] : [500, 700];
+  return [500, 700];                               // fruit tea (cold only)
+}
+// Menu list price. Hot milk tea price is not stated separately → uses the existing £4.00 (to confirm).
+function drinkListPrice(def, size, temp){
+  if (def.type === 'soft')   return 2;
+  if (def.type === 'matcha') return 5;
+  if (temp === 'hot')        return 4;
+  return size === 700 ? 5 : 4;
+}
+// Price of a configured drink in a given context:
+//   standalone → list price
+//   set        → 500ml included; 700ml +£1; Matcha +£1 supplement
+//   noodle     → 50% off the list price of the chosen size
+// plus £0.50 for each topping after the first (first topping = free swap of the included topping)
+function drinkPrice(def, d, ctx){
+  var temp = d.temp || 'cold';
+  var size = d.size || drinkSizes(def, temp)[0];
+  var list = drinkListPrice(def, size, temp);
+  var base;
+  if (ctx === 'set') {
+    base = 0;
+    if (def.type === 'matcha') base += 1;
+    if (size === 700) base += 1;
+  } else if (ctx === 'noodle') {
+    base = list / 2;
+  } else {
+    base = list;
+  }
+  var nTop = (d.toppings || []).length;
+  return r2(base + Math.max(0, nTop - 1) * DRINK_TOPPING_EXTRA);
+}
+
+function newDrinkSel(id){
+  var def = DRINKS[id];
+  var d = {id:id, size:null, temp:null, milk:null, sugar:null, ice:null, toppings:[]};
+  if (def.type === 'soft') return d;
+  if (def.type === 'milktea' || def.type === 'matcha') d.temp = 'cold';
+  d.size = drinkSizes(def, d.temp || 'cold')[0];
+  return d;
+}
+// Copy of a drink selection that is safe to store (fresh object, only fields relevant to the drink type)
+function cleanDrink(d){
+  if (!d || !DRINKS[d.id]) return null;
+  var def = DRINKS[d.id];
+  var o = {id:d.id};
+  if (def.type === 'soft') return o;
+  o.size   = d.size || null;
+  o.temp   = (def.type === 'milktea' || def.type === 'matcha') ? (d.temp || 'cold') : null;
+  o.milk   = (def.type === 'milktea' || def.type === 'matcha') ? (d.milk || null) : null;
+  o.sugar  = d.sugar || null;
+  o.ice    = (o.temp === 'hot') ? null : (d.ice || null);      // hot drinks never carry an ice level
+  o.toppings = (d.toppings || []).slice();
+  return o;
+}
+
+// ═════════════════════════════════════════════════════════════
+// PRICING (used by the modal preview, the cart and the order total)
+// ═════════════════════════════════════════════════════════════
+function toppingsCost(ids){
+  var c = Math.max(0, ids.length - 1) * TOPPING_EXTRA;       // first topping included
+  ids.forEach(function(id){ var t = byId(TOPPINGS, id); if (t) c += t.sur; });   // item surcharges always apply
+  return r2(c);
+}
+function calcItemPrice(item, s){
+  if (item.drink) {
+    return drinkPrice(DRINKS[item.drink], s.drink || {id:item.drink, toppings:[]}, 'standalone');
+  }
+  var t = item.p;
+  if (s.noodleBase) { var nb = byId(MODS.noodle_type.opts, s.noodleBase); if (nb) t += nb.price || 0; }
+  if (s.riceSauce)  { var rs = byId(MODS.rice_sauce.opts, s.riceSauce);  if (rs) t += rs.price || 0; }
+  if (s.toppings && s.toppings.length) t += toppingsCost(s.toppings);
+  (s.garnish || []).forEach(function(id){ var g = byId(GARNISH_OPTS, id); if (g && g.price) t += g.price; });
+  if (s.drink) t += drinkPrice(DRINKS[s.drink.id], s.drink, drinkCtx(item));
+  return r2(t);
+}
+
+// ═════════════════════════════════════════════════════════════
+// STRUCTURED ORDER DATA — the primary source for cart, history and WhatsApp
+// ═════════════════════════════════════════════════════════════
+function buildStructured(item){
+  var s = {
+    v: 2, itemId: item.id, name: item.name, st: item.st,
+    side:      custSel.side || null,
+    sauce:     custSel.sauce || null,
+    filling:   custSel.toast || null,
+    riceSauce: custSel.rice_sauce || null,
+    spice:     custSel.spice || null,
+    noodleBase:custSel.noodle_type || null,
+    extraNoodles: false,
+    toppings: selToppings.map(function(t){ return t.id; }),
+    garnish:  selGarnish.slice(),
+    drink:    drinkSel ? cleanDrink(drinkSel) : null
+  };
+  s.extraNoodles = s.garnish.indexOf('extra_noodles') > -1;
+  return s;
+}
+
+// ── Human-readable text (cart + history + CSV). WhatsApp does NOT parse these strings. ──
+function drinkDetail(d){
+  var def = DRINKS[d.id], p = [];
+  if (d.size)  p.push(d.size + 'ml');
+  if (def.type === 'milktea' || def.type === 'matcha') p.push(d.temp === 'hot' ? 'Hot' : 'Cold');
+  if (d.milk)  p.push(labelOf(MILK_OPTS, d.milk));
+  if (d.sugar) p.push(labelOf(SUGAR_OPTS, d.sugar));
+  if (d.temp !== 'hot' && d.ice) p.push(labelOf(ICE_OPTS, d.ice));
+  if (d.toppings && d.toppings.length) p.push('Toppings: ' + d.toppings.map(drinkToppingLabel).join(', '));
+  return p.join(' · ');
+}
+function drinkSummary(d){
+  var det = drinkDetail(d);
+  return DRINKS[d.id].name + (det ? ' · ' + det : '');
+}
+function summaryLines(item, s){
+  var L = [];
+  if (s.side)      L.push('Side: ' + labelOf(MODS.side.opts, s.side));
+  if (s.sauce)     L.push('Sauce: ' + labelOf(MODS.sauce.opts, s.sauce));
+  if (s.filling)   L.push('Filling: ' + labelOf(MODS.toast.opts, s.filling));
+  if (s.riceSauce && s.riceSauce !== 'none') L.push('Sauce: ' + labelOf(MODS.rice_sauce.opts, s.riceSauce));
+  if (s.noodleBase)L.push('Noodle base: ' + labelOf(MODS.noodle_type.opts, s.noodleBase));
+  if (s.spice)     L.push('Spice: ' + labelOf(MODS.spice.opts, s.spice));
+  if (s.toppings && s.toppings.length) L.push('Toppings: ' + s.toppings.map(toppingName).join(', '));
+  var g = (s.garnish || []).filter(function(id){ return id !== 'extra_noodles'; })
+                            .map(function(id){ return labelOf(GARNISH_OPTS, id); });
+  if (g.length) L.push('Garnish: ' + g.join(', '));
+  if (s.extraNoodles) L.push('Extra noodles');
+  if (s.drink) {
+    if (item.drink) { var det = drinkDetail(s.drink); if (det) L.push(det); }
+    else L.push('Drink: ' + drinkSummary(s.drink));
+  }
+  return L;
+}
+function fireToppingIds(s){
+  return (s && s.toppings ? s.toppings : []).filter(routesToFire);
+}
+
+// ═════════════════════════════════════════════════════════════
 // TABLE BUTTONS
-// ─────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════
 function buildTableBtns() {
   var g = document.getElementById('table-scroll');
   var h = '';
-  for (var i=1;i<=15;i++) h+='<button class="tno-btn" onclick="setTable(\''+i+'\')">'+i+'</button>';
-  h+='<button class="tno-btn" onclick="setTable(\'外帶\')">外帶</button>';
-  g.innerHTML=h;
+  for (var i = 1; i <= 15; i++) h += '<button class="tno-btn" onclick="setTable(\'' + i + '\')">' + i + '</button>';
+  h += '<button class="tno-btn" onclick="setTable(\'Takeaway\')">Takeaway</button>';
+  g.innerHTML = h;
 }
 function setTable(val) {
-  currentTable=val;
-  document.getElementById('tno-custom').value='';
-  document.getElementById('cur-table-display').textContent='枱 '+val;
-  var btns=document.getElementById('table-scroll').querySelectorAll('.tno-btn');
-  for(var i=0;i<btns.length;i++) btns[i].classList.toggle('on',btns[i].textContent===String(val));
-  document.getElementById('table-warn').style.display='none';
+  currentTable = val;
+  document.getElementById('tno-custom').value = '';
+  document.getElementById('cur-table-display').textContent = 'Table ' + val;
+  var btns = document.getElementById('table-scroll').querySelectorAll('.tno-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', btns[i].textContent === String(val));
+  document.getElementById('table-warn').style.display = 'none';
 }
 function setTableCustom(val) {
-  currentTable=val.trim();
-  var btns=document.getElementById('table-scroll').querySelectorAll('.tno-btn');
-  for(var i=0;i<btns.length;i++) btns[i].classList.remove('on');
-  document.getElementById('cur-table-display').textContent=currentTable?'枱 '+currentTable:'';
-  document.getElementById('table-warn').style.display='none';
+  currentTable = val.trim();
+  var btns = document.getElementById('table-scroll').querySelectorAll('.tno-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('on');
+  document.getElementById('cur-table-display').textContent = currentTable ? 'Table ' + currentTable : '';
+  document.getElementById('table-warn').style.display = 'none';
 }
 
-// ─────────────────────────────────────────
-// BUILD MENU PANELS
-// ─────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════
+// MENU PANELS
+// ═════════════════════════════════════════════════════════════
 function buildPanels() {
-  MENU_ITEMS=[];
-  var stKeys=['water','fire','noodle'];
-  for(var s=0;s<stKeys.length;s++){
-    var st=stKeys[s], p=document.getElementById('p-'+st), h='';
-    var sections=MENU[st].sections;
-    for(var si=0;si<sections.length;si++){
-      var sec=sections[si];
-      h+='<div class="sec-title">'+sec.t+'</div><div class="mgrid">';
-      for(var ii=0;ii<sec.items.length;ii++){
-        var item=sec.items[ii], idx=MENU_ITEMS.length;
-        MENU_ITEMS.push({st:st,zh:item.zh,en:item.en,p:item.p,mods:item.mods});
-        var pc=pausedItems[idx]?' paused':'';
-        h+='<div class="mitem'+pc+'" onclick="pickItem('+idx+')">'+
-          '<div class="zh">'+item.zh+'</div>'+
-          '<div class="en">'+item.en+'</div>'+
-          '<div class="pr">£'+item.p.toFixed(2)+'</div></div>';
+  MENU_ITEMS = [];
+  var stKeys = ['water', 'fire', 'noodle'];
+  for (var s = 0; s < stKeys.length; s++) {
+    var st = stKeys[s], p = document.getElementById('p-' + st), h = '';
+    var sections = MENU[st].sections;
+    for (var si = 0; si < sections.length; si++) {
+      var sec = sections[si];
+      h += '<div class="sec-title">' + esc(sec.t) + '</div><div class="mgrid">';
+      for (var ii = 0; ii < sec.items.length; ii++) {
+        var item = sec.items[ii], idx = MENU_ITEMS.length;
+        MENU_ITEMS.push(item);
+        var pc = pausedItems[item.id] ? ' paused' : '';
+        h += '<div class="mitem' + pc + '" onclick="pickItem(' + idx + ')">' +
+             '<div class="zh">' + esc(item.name) + '</div>' +
+             (item.desc ? '<div class="en">' + esc(item.desc) + '</div>' : '') +
+             '<div class="pr">' + gbp(item.p) + '</div></div>';
       }
-      h+='</div>';
+      h += '</div>';
     }
-    p.innerHTML=h;
+    p.innerHTML = h;
   }
 }
 
-// ─────────────────────────────────────────
-// PICK ITEM → MODAL
-// ─────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════
+// ITEM MODAL
+// ═════════════════════════════════════════════════════════════
 function pickItem(idx) {
-  if(pausedItems[idx]) return;
-  var item=MENU_ITEMS[idx];
-  if(!item.mods||item.mods.length===0){ addToCart(item.st,item.zh,item.en,item.p,'',[],[],0); return; }
-  pendingItem=item; custSel={}; selToppings=[]; selDrinkToppings=[]; selGarnish=[];
+  var item = MENU_ITEMS[idx];
+  if (!item || pausedItems[item.id]) return;
+  // every modal session starts from a clean slate → no settings leak between drinks / items
+  pendingItem = item; custSel = {}; selToppings = []; selGarnish = []; drinkSel = null;
+  if (item.drink) drinkSel = newDrinkSel(item.drink);
+  if (!item.mods || !item.mods.length) {               // nothing to choose → add straight away
+    addToCart(item, buildStructured(item));
+    pendingItem = null; drinkSel = null;
+    return;
+  }
   renderModal();
 }
 
+function optButton(mk, o, sc){
+  return '<div class="mod-opt" data-key="' + mk + '" data-id="' + o.id + '" data-sel="' + sc + '" onclick="selOpt(this)">' +
+         esc(o.label) + (o.price ? ' +' + gbp(o.price) : '') + '</div>';
+}
+function groupHTML(mk, sc){
+  var md = MODS[mk];
+  var h = '<div class="mod-group"><div class="mod-label">' + md.label + (md.req ? ' <span class="req">*</span>' : '') + '</div><div class="mod-opts">';
+  md.opts.forEach(function(o){ h += optButton(mk, o, sc); });
+  return h + '</div></div>';
+}
+
 function renderModal() {
-  var item=pendingItem;
-  var sc=item.st==='water'?'sel-w':item.st==='fire'?'sel-f':'sel-n';
-  var h='<div class="modal-handle"></div>'+
-    '<div class="modal-title">'+item.zh+'</div>'+
-    '<div class="modal-sub">'+item.en+' · £'+item.p.toFixed(2)+'</div>';
-  for(var mi=0;mi<item.mods.length;mi++){
-    var mk=item.mods[mi];
-    if(mk==='DRINK_CUSTOM'||mk==='DRINK_CUSTOM_NO_MILK'){
-      h+=buildDrinkCustomSection(sc,mk==='DRINK_CUSTOM');
-    } else if(mk==='SET_DRINK'){
-      h+='<hr class="section-divider">';
-      h+='<div class="mod-group"><div class="mod-label">套餐飲品 Set Drink</div>'+
-        '<div class="mod-hint">抹茶拿鐵需加£1 · 可升大杯+£1</div><div class="mod-opts">';
-      for(var di=0;di<SET_DRINKS.length;di++){
-        var sd=SET_DRINKS[di], sv=sd.label.replace(/"/g,'&quot;');
-        h+='<div class="mod-opt" data-key="set_drink" data-val="'+sv+'" data-drinkprice="'+sd.price+'" data-sel="'+sc+'" onclick="selOpt(this)">'+sd.label+'</div>';
-      }
-      h+='</div></div>';
-      h+='<div class="mod-group"><div class="mod-label">杯型 Cup Size</div>'+
-        '<div class="size-opts">'+
-        '<div class="size-opt" data-key="cup_size" data-val="標準 500ml" data-drinkprice="0" data-sel="'+sc+'" onclick="selOpt(this)">標準 500ml<br><span style="font-size:10px;color:var(--text3)">included</span></div>'+
-        '<div class="size-opt" data-key="cup_size" data-val="大杯 700ml +£1" data-drinkprice="1" data-sel="'+sc+'" onclick="selOpt(this)">大杯 700ml<br><span style="font-size:10px;color:var(--text3)">+£1</span></div>'+
-        '</div></div>';
-      h+=buildDrinkCustomSection(sc,true);
-    } else if(mk==='NOODLE_DRINK'){
-      h+='<hr class="section-divider">';
-      h+='<div class="mod-group"><div class="mod-label">追加飲品 Add Drink</div>'+
-        '<div class="mod-hint">珍珠奶茶+£2・抹茶+£3・罐裝+£1</div><div class="mod-opts">';
-      for(var di=0;di<NOODLE_DRINKS.length;di++){
-        var nd=NOODLE_DRINKS[di], sv=nd.label.replace(/"/g,'&quot;');
-        h+='<div class="mod-opt" data-key="noodle_drink" data-val="'+sv+'" data-drinkprice="'+nd.price+'" data-sel="'+sc+'" onclick="selOpt(this)">'+nd.label+'</div>';
-      }
-      h+='</div></div>';
-      h+=buildDrinkCustomSection(sc,true);
-    } else if(mk==='TOPPINGS'){
-      h+='<hr class="section-divider">'+buildToppingSection(sc);
-    } else if(mk==='GARNISH'){
-      h+='<div class="mod-group"><div class="mod-label">配菜要求 Garnish</div>'+
-        '<div class="mod-hint">可多選 · 加底+£1</div><div class="mod-opts">';
-      for(var gi=0;gi<GARNISH_OPTS.length;gi++){
-        var go=GARNISH_OPTS[gi], sv=go.label.replace(/"/g,'&quot;');
-        h+='<div class="mod-opt" data-garnish="'+sv+'" data-gprice="'+go.price+'" data-sel="'+sc+'" onclick="togGarnish(this)">'+go.label+'</div>';
-      }
-      h+='</div></div>';
-    } else {
-      var resolvedMk = mk === 'NOODLE_TYPE' ? 'noodle_type' : mk;
-      var md=MODS[resolvedMk]; if(!md) continue;
-      h+='<div class="mod-group"><div class="mod-label">'+md.label+'</div><div class="mod-opts">';
-      for(var oi=0;oi<md.opts.length;oi++){
-        var sv=md.opts[oi].replace(/"/g,'&quot;');
-        var dp=(md.prices&&md.prices[oi]!=null)?md.prices[oi]:0;
-        h+='<div class="mod-opt" data-key="'+resolvedMk+'" data-val="'+sv+'" data-drinkprice="'+dp+'" data-sel="'+sc+'" onclick="selOpt(this)">'+md.opts[oi]+'</div>';
-      }
-      h+='</div></div>';
+  var item = pendingItem, sc = selClassFor(item.st);
+  var h = '<div class="modal-handle"></div>' +
+          '<div class="modal-title">' + esc(item.name) + '</div>' +
+          '<div class="modal-sub">' + (item.desc ? esc(item.desc) + ' · ' : '') + (item.drink ? 'from ' : '') + gbp(item.p) + '</div>';
+  for (var mi = 0; mi < item.mods.length; mi++) {
+    var mk = item.mods[mi];
+    if (mk === 'DRINK_CUSTOM' || mk === 'SET_DRINK' || mk === 'NOODLE_DRINK') {
+      if (mk !== 'DRINK_CUSTOM') h += '<hr class="section-divider">';
+      h += '<div id="drink-cfg"></div>';
+    } else if (mk === 'TOPPINGS') {
+      h += '<hr class="section-divider">' + buildToppingSection(sc);
+    } else if (mk === 'GARNISH') {
+      h += buildGarnishSection(item, sc);
+    } else if (mk === 'NOODLE_TYPE') {
+      h += groupHTML('noodle_type', sc);
+    } else if (MODS[mk]) {
+      h += groupHTML(mk, sc);
     }
   }
-  h+='<div class="modal-btns"><button class="modal-cancel" onclick="closeModal()">取消</button>'+
-    '<button class="modal-confirm" onclick="confirmMod()">加入訂單 Add +</button></div>';
-  document.getElementById('modal-sheet').innerHTML=h;
+  h += '<div class="modal-err" id="modal-err"></div>' +
+       '<div class="modal-btns"><button class="modal-cancel" onclick="closeModal()">Cancel</button>' +
+       '<button class="modal-confirm" id="modal-confirm" onclick="confirmMod()">Add to order</button></div>';
+  document.getElementById('modal-sheet').innerHTML = h;
   document.getElementById('modal-overlay').classList.add('on');
+  renderDrinkCfg();
+  updateTopStatus();
+  updateModalPrice();
 }
 
-function buildDrinkCustomSection(sc,includeMilk){
-  var h='<div class="mod-group"><div class="mod-label">糖度 Sugar</div><div class="mod-opts">';
-  for(var i=0;i<SUGAR_OPTS.length;i++){var sv=SUGAR_OPTS[i].replace(/"/g,'&quot;');h+='<div class="mod-opt" data-key="sugar" data-val="'+sv+'" data-sel="'+sc+'" onclick="selOpt(this)">'+SUGAR_OPTS[i]+'</div>';}
-  h+='</div></div><div class="mod-group"><div class="mod-label">冰度 Ice</div><div class="mod-opts">';
-  for(var i=0;i<ICE_OPTS.length;i++){var sv=ICE_OPTS[i].replace(/"/g,'&quot;');h+='<div class="mod-opt" data-key="ice" data-val="'+sv+'" data-sel="'+sc+'" onclick="selOpt(this)">'+ICE_OPTS[i]+'</div>';}
-  h+='</div></div>';
-  if(includeMilk){
-    h+='<div class="mod-group"><div class="mod-label">奶類 Milk</div><div class="mod-opts">';
-    for(var i=0;i<MILK_OPTS.length;i++){var sv=MILK_OPTS[i].replace(/"/g,'&quot;');h+='<div class="mod-opt" data-key="milk" data-val="'+sv+'" data-sel="'+sc+'" onclick="selOpt(this)">'+MILK_OPTS[i]+'</div>';}
-    h+='</div></div>';
-  }
-  h+='<div class="mod-group"><div class="mod-label">飲品配料 Drink Topping</div>'+
-    '<div class="mod-hint">換第1款免費・之後每款+50p</div><div class="mod-opts" id="drink-top-opts">';
-  for(var i=0;i<DRINK_TOPPINGS.length;i++){var sv=DRINK_TOPPINGS[i].replace(/"/g,'&quot;');h+='<div class="mod-opt" data-dtop="'+sv+'" data-sel="'+sc+'" onclick="togDrinkTop(this)">'+DRINK_TOPPINGS[i]+'</div>';}
-  h+='</div><div class="topping-status" id="dtop-status">未選配料</div></div>';
-  return h;
+// ── simple single-choice groups ──
+function selOpt(el) {
+  var mk = el.getAttribute('data-key'), id = el.getAttribute('data-id'), sc = el.getAttribute('data-sel');
+  var sibs = el.parentElement.querySelectorAll('[data-key="' + mk + '"]');
+  for (var i = 0; i < sibs.length; i++) sibs[i].classList.remove('sel-w', 'sel-f', 'sel-n');
+  el.classList.add(sc);
+  custSel[mk] = id;
+  clearModalError();
+  updateModalPrice();
 }
 
-function buildToppingSection(sc){
-  var h='<div class="mod-group"><div class="mod-label">配料 Toppings（無限追加）</div>'+
-    '<div class="mod-hint">首1款包含・額外每款+£2・五香牛腩另加+£2<br><span style="color:var(--fire-t)">🔥虛線框＝需通知火位</span></div><div class="mod-opts">';
-  for(var ti=0;ti<TOPPINGS.length;ti++){
-    var t=TOPPINGS[ti];
-    var needsFire=routesToFire(t.name);
-    var cls=needsFire?' fire-needed':''; if(t.isExtra) cls+=' extra-charge';
-    var badges=needsFire?'<span class="fire-badge">🔥</span>':'';
-    if(t.isExtra) badges+='<span class="extra-badge">+£2</span>';
-    var sv=t.name.replace(/"/g,'&quot;');
-    // data-fire now derived from ROUTING at runtime; pass name only
-    h+='<div class="mod-opt'+cls+'" data-top="'+sv+'" data-xtra="'+(t.isExtra?'1':'0')+'" data-xamt="'+(t.extraAmt||0)+'" data-sel="'+sc+'" onclick="togTop(this)">'+t.name+badges+'</div>';
-  }
-  h+='</div><div class="topping-status" id="top-status">已選 0 款・首1款包含</div></div>';
-  return h;
+// ── noodle toppings ──
+function buildToppingSection(sc) {
+  var h = '<div class="mod-group"><div class="mod-label">Toppings</div>' +
+          '<div class="mod-hint">First topping included · each additional topping +' + gbp(TOPPING_EXTRA) +
+          ' · item surcharges always apply · 🔥 = Fire Station also prepares it</div><div class="mod-opts">';
+  TOPPINGS.forEach(function(t){
+    var fire = routesToFire(t.id);
+    h += '<div class="mod-opt' + (fire ? ' fire-needed' : '') + (t.sur ? ' extra-charge' : '') + '" data-top="' + t.id + '" data-sel="' + sc + '" onclick="togTop(\'' + t.id + '\', this)">' +
+         esc(t.name) + (fire ? '<span class="fire-badge">🔥</span>' : '') +
+         (t.sur ? '<span class="extra-badge">+' + gbp(t.sur) + '</span>' : '') + '</div>';
+  });
+  return h + '</div><div class="topping-status" id="top-status"></div></div>';
+}
+function togTop(id, el) {
+  var sc = el.getAttribute('data-sel'), at = -1;
+  for (var i = 0; i < selToppings.length; i++) { if (selToppings[i].id === id) { at = i; break; } }
+  if (at > -1) { selToppings.splice(at, 1); el.classList.remove('sel-w', 'sel-f', 'sel-n'); }
+  else         { selToppings.push({id:id}); el.classList.add(sc); }
+  updateTopStatus(); updateModalPrice();
+}
+function updateTopStatus() {
+  var el = document.getElementById('top-status'); if (!el) return;
+  var ids = selToppings.map(function(t){ return t.id; });
+  var c = toppingsCost(ids);
+  el.className = 'topping-status';
+  el.textContent = ids.length + ' selected' + (ids.length === 0 ? ' · first topping included' : (c > 0 ? ' · topping charges ' + gbp(c) : ' · included'));
 }
 
-// ─────────────────────────────────────────
-// TOGGLE HANDLERS
-// ─────────────────────────────────────────
-function togTop(el){
-  var name=el.getAttribute('data-top'),isExtra=el.getAttribute('data-xtra')==='1',extraAmt=parseFloat(el.getAttribute('data-xamt')||'2'),sc=el.getAttribute('data-sel');
-  var isOn=el.classList.contains(sc);
-  if(isOn){el.classList.remove('sel-w','sel-f','sel-n');for(var i=0;i<selToppings.length;i++){if(selToppings[i].name===name){selToppings.splice(i,1);break;}}}
-  else{
-    el.classList.add(sc);
-    selToppings.push({name:name,isExtra:isExtra,extraAmt:extraAmt});
+// ── garnish ──
+function buildGarnishSection(item, sc) {
+  var h = '<div class="mod-group"><div class="mod-label">Garnish & extras</div>';
+  if (item.defaults && item.defaults.length) h += '<div class="mod-hint">Comes with: ' + esc(item.defaults.join(', ')) + '</div>';
+  h += '<div class="mod-opts">';
+  GARNISH_OPTS.forEach(function(g){
+    if (g.needs && item.defaults && item.defaults.indexOf(g.needs) < 0) return;   // only offer "No X" for things the soup includes
+    h += '<div class="mod-opt" data-garnish="' + g.id + '" data-sel="' + sc + '" onclick="togGarnish(\'' + g.id + '\')">' +
+         esc(g.label) + (g.price ? ' +' + gbp(g.price) : '') + '</div>';
+  });
+  return h + '</div></div>';
+}
+function togGarnish(id) {
+  var g = byId(GARNISH_OPTS, id), at = selGarnish.indexOf(id);
+  if (at > -1) selGarnish.splice(at, 1);
+  else {
+    selGarnish = selGarnish.filter(function(o){ var og = byId(GARNISH_OPTS, o); return !(og && og.group === g.group); });  // e.g. "No" vs "Extra" spring onion
+    selGarnish.push(id);
   }
-  var cnt=selToppings.length,cost=0;
-  for(var i=0;i<selToppings.length;i++){
-    if(i>0) cost+=2;
-    if(selToppings[i].isExtra) cost+=(selToppings[i].extraAmt||2);
+  var els = document.querySelectorAll('[data-garnish]');
+  for (var i = 0; i < els.length; i++) {
+    var on = selGarnish.indexOf(els[i].getAttribute('data-garnish')) > -1;
+    els[i].classList[on ? 'add' : 'remove'](els[i].getAttribute('data-sel'));
+    if (!on) els[i].classList.remove('sel-w', 'sel-f', 'sel-n');
   }
-  var el2=document.getElementById('top-status');if(el2){el2.className='topping-status';el2.textContent='已選 '+cnt+' 款'+(cost>0?'  額外 +£'+cost:'  首1款包含');}
-}
-function togDrinkTop(el){
-  var name=el.getAttribute('data-dtop'),sc=el.getAttribute('data-sel'),isOn=el.classList.contains(sc);
-  if(isOn){el.classList.remove('sel-w','sel-f','sel-n');for(var i=0;i<selDrinkToppings.length;i++){if(selDrinkToppings[i]===name){selDrinkToppings.splice(i,1);break;}}}
-  else{el.classList.add(sc);selDrinkToppings.push(name);}
-  var cnt=selDrinkToppings.length,cost=Math.max(0,cnt-1)*0.5;
-  var el2=document.getElementById('dtop-status');if(el2){el2.textContent=cnt===0?'未選配料':'已選 '+cnt+' 款'+(cost>0?'  額外 +£'+cost.toFixed(2):'  免費換');}
-}
-function togGarnish(el){
-  var name=el.getAttribute('data-garnish'),gp=parseFloat(el.getAttribute('data-gprice')||'0')||0,sc=el.getAttribute('data-sel'),isOn=el.classList.contains(sc);
-  if(isOn){el.classList.remove('sel-w','sel-f','sel-n');for(var i=0;i<selGarnish.length;i++){if(selGarnish[i].label===name){selGarnish.splice(i,1);break;}}}
-  else{el.classList.add(sc);selGarnish.push({label:name,price:gp});}
-}
-function selOpt(el){
-  var mk=el.getAttribute('data-key'),val=el.getAttribute('data-val'),sc=el.getAttribute('data-sel'),dp=parseFloat(el.getAttribute('data-drinkprice')||'0')||0;
-  var siblings=el.parentElement.querySelectorAll('[data-key="'+mk+'"]');
-  for(var i=0;i<siblings.length;i++) siblings[i].classList.remove('sel-w','sel-f','sel-n');
-  el.classList.add(sc); custSel[mk]={val:val,drinkPrice:dp};
+  updateModalPrice();
 }
 
-// ─────────────────────────────────────────
-// CONFIRM MOD
-// ─────────────────────────────────────────
-function confirmMod(){
-  if(!pendingItem) return;
-  var extraPrice=0, fireTops=[], waterNotes=[];
-  var keys=Object.keys(custSel);
+// ═════════════════════════════════════════════════════════════
+// DRINK CONFIGURATOR — one implementation for standalone, set-meal and noodle add-on drinks
+// ═════════════════════════════════════════════════════════════
+function dOpt(field, val, label, selected, sc){
+  return '<div class="mod-opt' + (selected ? ' ' + sc : '') + '" data-dk="' + field + '" data-dv="' + val + '" onclick="setDrinkField(\'' + field + '\',\'' + val + '\')">' + esc(label) + '</div>';
+}
+function priceTag(def, size, temp, ctx){
+  var p = drinkPrice(def, {size:size, temp:temp, toppings:[]}, ctx);
+  if (ctx === 'standalone') return gbp(p);
+  return p === 0 ? 'included' : '+' + gbp(p);
+}
+function renderDrinkCfg() {
+  var host = document.getElementById('drink-cfg'); if (!host || !pendingItem) return;
+  var item = pendingItem, ctx = drinkCtx(item), sc = selClassFor(item.st), h = '';
 
-  // ── 基本選項 ──
-  var spice='', sugar='', ice='', milk='', side='', sauce='', setDrink='', noodleDrink='', cupSize='', noodleType='', toastFilling='', noodleNoodleType='', setfSide='', milkTemp='';
-  for(var i=0;i<keys.length;i++){
-    var k=keys[i], v=custSel[k].val, dp=custSel[k].drinkPrice||0;
-    if(!v) continue;
-    extraPrice+=dp;
-    if(k==='spice') spice=v;
-    else if(k==='sugar') sugar=v;
-    else if(k==='ice') ice=v;
-    else if(k==='milk') milk=v;
-    else if(k==='side') side=v;
-    else if(k==='sauce') sauce=v;
-    else if(k==='set_drink') setDrink=v;
-    else if(k==='noodle_drink') noodleDrink=v;
-    else if(k==='cup_size') cupSize=v;
-    else if(k==='noodle_set') noodleType=v;
-    else if(k==='toast') toastFilling=v;
-    else if(k==='icecream') toastFilling=v;
-    else if(k==='noodle_type'){
-      noodleNoodleType=v;
-      // dp already added by the general extraPrice+=dp above — do NOT add again
-    }
-    else if(k==='setf_side') setfSide=v;
-    else if(k==='milk_temp') milkTemp=v;
-    else if(k==='rice_sauce'){
-      if(v&&v!=='不加') extraPrice+=1;
-    }
+  // drink picker (set meals and noodle bowls)
+  if (ctx !== 'standalone') {
+    h += '<div class="mod-group"><div class="mod-label">' + (ctx === 'set' ? 'Included drink' : 'Add a drink (50% off)') + '</div>';
+    h += '<div class="mod-hint">' + (ctx === 'set'
+      ? '500ml included · 700ml +£1.00 · Matcha +£1.00'
+      : '50% off the menu price of the chosen size') + '</div><div class="mod-opts">';
+    if (ctx === 'noodle') h += dOpt('drink', 'none', 'No drink', !drinkSel, sc);
+    DRINK_LIST.forEach(function(d){
+      var tag = d.type === 'soft' ? priceTag(d, null, null, ctx) : priceTag(d, drinkSizes(d, 'cold')[0], 'cold', ctx);
+      h += dOpt('drink', d.id, d.name + ' (' + tag + ')', !!(drinkSel && drinkSel.id === d.id), sc);
+    });
+    h += '</div></div>';
   }
 
-  // ── 飲品 Topping ──
-  var drinkTopStr='';
-  if(selDrinkToppings.length>0){
-    var dtcost=Math.max(0,selDrinkToppings.length-1)*0.5;
-    extraPrice+=dtcost;
-    drinkTopStr=selDrinkToppings.join('、');
-  }
-
-  // ── 配料 Toppings ──
-  var topNames=[];
-  if(pendingItem.mods.indexOf('TOPPINGS')>=0&&selToppings.length>0){
-    for(var i=0;i<selToppings.length;i++){
-      var t=selToppings[i];
-      topNames.push(t.name);
-      if(i>0) extraPrice+=2;                    // per-extra-topping charge
-      if(t.isExtra) extraPrice+=(t.extraAmt||2); // item-specific surcharge
-      if(routesToFire(t.name)) fireTops.push(t.name);
-    }
-  }
-
-  // ── 配菜 Garnish ──
-  var garnishList=[];
-  if(selGarnish.length>0){
-    for(var i=0;i<selGarnish.length;i++){
-      garnishList.push(selGarnish[i].label);
-      extraPrice+=selGarnish[i].price;
+  if (drinkSel) {
+    var def = DRINKS[drinkSel.id];
+    if (def.type !== 'soft') {
+      var temps = drinkTemps(def, ctx);
+      if (temps.length > 1) {
+        h += '<div class="mod-group"><div class="mod-label">Temperature</div><div class="mod-opts">';
+        temps.forEach(function(t){ h += dOpt('temp', t, labelOf(TEMP_OPTS, t), drinkSel.temp === t, sc); });
+        h += '</div></div>';
+      }
+      var sizes = drinkSizes(def, drinkSel.temp || 'cold');
+      h += '<div class="mod-group"><div class="mod-label">Size</div><div class="mod-opts">';
+      sizes.forEach(function(z){ h += dOpt('size', z, z + 'ml · ' + priceTag(def, z, drinkSel.temp || 'cold', ctx), drinkSel.size === z, sc); });
+      h += '</div></div>';
+      if (def.type === 'milktea' || def.type === 'matcha') {
+        h += '<div class="mod-group"><div class="mod-label">Milk</div><div class="mod-opts">';
+        MILK_OPTS.forEach(function(m){ h += dOpt('milk', m.id, m.label, drinkSel.milk === m.id, sc); });
+        h += '</div></div>';
+      }
+      h += '<div class="mod-group"><div class="mod-label">Sugar level</div><div class="mod-opts">';
+      SUGAR_OPTS.forEach(function(o){ h += dOpt('sugar', o.id, o.label, drinkSel.sugar === o.id, sc); });
+      h += '</div></div>';
+      if (drinkSel.temp !== 'hot') {                       // hot drinks have no ice level
+        h += '<div class="mod-group"><div class="mod-label">Ice level</div><div class="mod-opts">';
+        ICE_OPTS.forEach(function(o){ h += dOpt('ice', o.id, o.label, drinkSel.ice === o.id, sc); });
+        h += '</div></div>';
+      }
+      h += '<div class="mod-group"><div class="mod-label">Drink toppings</div>' +
+           '<div class="mod-hint">Includes ' + esc(def.includes) + '. The first topping you choose replaces it (no charge); each additional topping +' + gbp(DRINK_TOPPING_EXTRA) + '.</div><div class="mod-opts">';
+      DRINK_TOPPINGS.forEach(function(t){
+        h += '<div class="mod-opt' + (drinkSel.toppings.indexOf(t.id) > -1 ? ' ' + sc : '') + '" data-dtop="' + t.id + '" onclick="toggleDrinkTopping(\'' + t.id + '\')">' + esc(t.label) + '</div>';
+      });
+      h += '</div></div>';
     }
   }
+  host.innerHTML = h;
+}
+function setDrinkField(f, v) {
+  if (f === 'drink') { drinkSel = (v === 'none') ? null : newDrinkSel(v); }     // fresh object → nothing carried over from another drink
+  else if (drinkSel) {
+    var def = DRINKS[drinkSel.id];
+    if (f === 'size') drinkSel.size = Number(v);
+    else if (f === 'temp') {
+      drinkSel.temp = v;
+      drinkSel.size = drinkSizes(def, v)[0];           // hot = 350ml, cold = 500ml
+      if (v === 'hot') drinkSel.ice = null;            // hot drinks carry no ice level
+    } else drinkSel[f] = v;                            // milk / sugar / ice
+  }
+  renderDrinkCfg(); clearModalError(); updateModalPrice();
+}
+function toggleDrinkTopping(id) {
+  if (!drinkSel) return;
+  var at = drinkSel.toppings.indexOf(id);
+  if (at > -1) drinkSel.toppings.splice(at, 1); else drinkSel.toppings.push(id);
+  renderDrinkCfg(); updateModalPrice();
+}
 
-  // ── 水吧 waterNotes (飲品相關) ──
-  var dnp=[];
-  if(setDrink) dnp.push(setDrink);
-  if(noodleDrink&&noodleDrink!=='不加') dnp.push(noodleDrink);
-  if(sugar) dnp.push(sugar);
-  if(ice) dnp.push(ice);
-  if(milk) dnp.push(milk);
-  if(cupSize) dnp.push(cupSize);
-  if(drinkTopStr) dnp.push('配料：'+drinkTopStr);
-  if(dnp.length>0) waterNotes=dnp;
-
-  // ── 儲存結構化資料 ──
-  var structured = {
-    spice:spice, sugar:sugar, ice:ice, milk:milk, milkTemp:milkTemp,
-    side:side, sauce:sauce, setDrink:setDrink,
-    noodleDrink:(noodleDrink==='不加'?'':noodleDrink),
-    cupSize:cupSize, noodleType:noodleType, toastFilling:toastFilling,
-    noodleNoodleType:noodleNoodleType, setfSide:setfSide,
-    tops:topNames, garnish:garnishList, drinkTops:drinkTopStr
-  };
-
-  // ── 顯示用 mods string（落單畫面用）──
-  var displayParts=[];
-  if(spice) displayParts.push(SPICE_EMOJI[spice]||spice);
-  if(noodleNoodleType) displayParts.push('麵底：'+noodleNoodleType.split(' ')[0]);
-  if(topNames.length>0) displayParts.push('配：'+topNames.join('、'));
-  if(garnishList.length>0) displayParts.push(garnishList.join(' '));
-  if(setDrink) displayParts.push('飲：'+setDrink);
-  if(noodleDrink&&noodleDrink!=='不加') displayParts.push('追加：'+noodleDrink);
-  if(milkTemp) displayParts.push(milkTemp.indexOf('熱')>-1?'熱':'凍');
-  if(sugar||ice) displayParts.push([sugar,ice].filter(Boolean).join('｜'));
-  if(toastFilling) displayParts.push('餡：'+toastFilling);
-  if(setfSide) displayParts.push(setfSide.split(' ')[0]);
-  if(side) displayParts.push(side);
-  if(sauce) displayParts.push(sauce);
-
-  addToCart(pendingItem.st,pendingItem.zh,pendingItem.en,pendingItem.p,displayParts.join(' · '),fireTops,waterNotes,extraPrice,structured);
+// ── modal helpers ──
+function missingRequired(item) {
+  var miss = [];
+  item.mods.forEach(function(mk){
+    if (mk === 'side'        && !custSel.side)        miss.push('Side');
+    if (mk === 'sauce'       && !custSel.sauce)       miss.push('Sauce');
+    if (mk === 'toast'       && !custSel.toast)       miss.push('Filling');
+    if (mk === 'NOODLE_TYPE' && !custSel.noodle_type) miss.push('Noodle base');
+  });
+  return miss;
+}
+function showModalError(msg) { var e = document.getElementById('modal-err'); if (e) { e.textContent = msg; e.style.display = 'block'; } }
+function clearModalError()   { var e = document.getElementById('modal-err'); if (e) { e.style.display = 'none'; } }
+function updateModalPrice() {
+  var b = document.getElementById('modal-confirm'); if (!b || !pendingItem) return;
+  b.textContent = 'Add to order · ' + gbp(calcItemPrice(pendingItem, buildStructured(pendingItem)));
+}
+function confirmMod() {
+  if (!pendingItem) return;
+  var miss = missingRequired(pendingItem);
+  if (miss.length) { showModalError('Please choose: ' + miss.join(', ')); return; }
+  addToCart(pendingItem, buildStructured(pendingItem));
   closeModal();
 }
-
-function closeModal(){
+function closeModal() {
   document.getElementById('modal-overlay').classList.remove('on');
-  pendingItem=null;custSel={};selToppings=[];selDrinkToppings=[];selGarnish=[];
+  pendingItem = null; custSel = {}; selToppings = []; selGarnish = []; drinkSel = null;
 }
-document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('modal-overlay').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
 
-// ─────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════
 // CART
-// ─────────────────────────────────────────
-function addToCart(st,zh,en,p,mods,fireTops,waterNotes,extraP,structured){
-  cart.push({st:st,zh:zh,en:en,p:p+(extraP||0),qty:1,mods:mods,fireTops:fireTops||[],waterNotes:waterNotes||[],structured:structured||null});
+// ═════════════════════════════════════════════════════════════
+function addToCart(item, structured) {
+  var p = calcItemPrice(item, structured);
+  var lines = summaryLines(item, structured);
+  cart.push({
+    id: item.id, st: item.st, name: item.name, zh: item.name,    // `zh` kept as an alias so old history records still render
+    en: item.desc || '', p: p, qty: 1,
+    summary: lines, mods: lines.join(' · '),
+    structured: structured,
+    fireTops: (item.st === 'noodle' ? fireToppingIds(structured) : []).map(toppingName)
+  });
   renderCart();
 }
-function chgQty(idx,d){cart[idx].qty+=d;if(cart[idx].qty<=0)cart.splice(idx,1);renderCart();}
-function clearCart(){cart=[];renderCart();}
+function chgQty(idx, d) {             // quantity edits never touch the saved customisations
+  cart[idx].qty += d;
+  if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  renderCart();
+}
+function clearCart() { cart = []; renderCart(); }
 
-function renderCart(){
-  var l=document.getElementById('cart-list'),f=document.getElementById('cart-foot');
-  if(!cart.length){l.innerHTML='<div class="empty-msg">請選擇項目 Select items above</div>';f.style.display='none';return;}
-  var tot=0,h='';
-  for(var i=0;i<cart.length;i++){
-    var it=cart[i],sub=it.p*it.qty;tot+=sub;
-    var bc=it.st==='water'?'bw':it.st==='fire'?'bf':'bn';
-    var bl=it.st==='water'?'💧水吧':it.st==='fire'?'🔥火位':'🍜麵位';
-    h+='<div class="crow"><span class="cbadge '+bc+'">'+bl+'</span>'+
-      '<div style="flex:1"><div class="cname">'+it.zh+'</div>'+
-      (it.mods?'<div class="cmods">'+it.mods+'</div>':'')+
-      (it.fireTops&&it.fireTops.length?'<div class="cmods fire">🔥火位：'+it.fireTops.join('、')+'</div>':'')+
-      (it.waterNotes&&it.waterNotes.length&&it.st!=='water'?'<div class="cmods water">💧水吧：'+it.waterNotes.join(' ')+'</div>':'')+
-      '</div>'+
-      '<button class="qbtn" onclick="chgQty('+i+',-1)">−</button>'+
-      '<span class="qty">'+it.qty+'</span>'+
-      '<button class="qbtn" onclick="chgQty('+i+',1)">+</button>'+
-      '<span class="cprice">£'+sub.toFixed(2)+'</span></div>';
+function renderCart() {
+  var l = document.getElementById('cart-list'), f = document.getElementById('cart-foot');
+  if (!cart.length) {
+    l.innerHTML = '<div class="empty-msg">Select items above</div>';
+    f.style.display = 'none';
+    return;
   }
-  l.innerHTML=h;
-  document.getElementById('tot').textContent='£'+tot.toFixed(2);
-  f.style.display='block';
-}
-
-// ─────────────────────────────────────────
-// SHORT NAME TABLE (簡稱表)
-// ─────────────────────────────────────────
-var SHORT_NAMES = {
-  // 米線湯底
-  '清湯米線':'清湯','酸辣湯米線':'酸辣','麻辣湯米線':'麻辣','酸麻辣湯米線':'酸麻辣','蕃茄濃湯米線':'蕃茄',
-  // 配料 — new full names → short display
-  '招牌火山牛丸 Signature Volcano Beef Ball':     '牛丸',
-  '辣椒孜然雞翼 Spicy Cumin Chicken Wings':       '孜然雞翼',
-  '鮮蝦雞肉雲吞 Fresh Shrimp & Chicken Wonton':  '雲吞',
-  '魚春卷 Fish Spring Roll':                              '魚春卷',
-  '炸魚春卷 Fried Fish Spring Roll':              '炸魚春卷',
-  '五香牛腩牛展 Five Spice Beef Brisket with Tendon':'牛腩牛展',
-  '五香牛展 Five Spice Beef Shin':                '牛展',
-  '酸菜 Pickled Mustard Greens':                  '酸菜',
-  '鹵水雞翼 Braised Chicken Wings':               '鹵雞翼',
-  '炸雞腿 Deep Fried Chicken Leg':                '炸雞腿',
-  '魚蛋 Fish Ball':                               '魚蛋',
-  '芝士魚豆腐 Cheese Fish Tofu':                  '芝士魚豆腐',
-  '墨魚丸 Cuttlefish Ball':                       '墨魚丸',
-  '肥牛 Beef Slices':                             '肥牛',
-  '豆卜 Bean Curd Puff':                          '豆卜',
-  '腐皮 Bean Curd Sheet':                         '腐皮',
-  '芽菜 Bean Sprouts':                            '芽菜',
-  '鹵水蛋 Braised Egg':                           '鹵蛋',
-  '鹵水豆腐 Braised Tofu':                        '鹵豆腐',
-  // 套餐
-  '炸雞翼套餐':'炸雞翼套餐','照燒豆腐套餐':'豆腐套餐',
-  '五香牛腩牛展套餐':'牛腩牛展套餐','炸雞腿套餐':'炸雞腿套餐',
-  // 小食
-  '炸雲吞 (6隻)':'炸雲吞×6','炸蠔 (4隻)':'炸蠔×4',
-  '辣椒孜然雞翼 (5隻)':'孜然雞翼×5','照燒豆腐':'照燒豆腐',
-  '椒鹽魷魚鬚':'椒鹽魷魚鬚','薯片':'薯片','白飯':'白飯','西多士':'西多士',
-  '牛肉丸 (6粒)':'牛丸×6',
-  // 飲品 — single order
-  '台式珍珠奶茶':'珍奶','黑糖珍珠奶茶':'黑糖珍奶',
-  '朱古力珍珠奶茶':'朱古力珍奶','椰奶紅豆奶茶':'椰紅豆奶',
-  '芒果果茶':'芒果茶','荔枝果茶':'荔枝茶','白桃果茶':'白桃茶','檸檬果茶':'檸檬茶',
-  '抹茶紅豆拿鐵':'抹茶拿鐵','軟飲 Soft Drink':'軟飲',
-  // 飲品 — noodle add-on labels
-  '台式珍珠奶茶 +£2':'珍奶','黑糖珍珠奶茶 +£2':'黑糖珍奶',
-  '朱古力珍珠奶茶 +£2':'朱古力珍奶','椰奶紅豆奶茶 +£2':'椰紅豆奶',
-  '芒果果茶 +£2':'芒果茶','荔枝果茶 +£2':'荔枝茶',
-  '白桃果茶 +£2':'白桃茶','檸檬果茶 +£2':'檸檬茶',
-  '抹茶紅豆拿鐵 +£3':'抹茶拿鐵','軟飲 Soft Drink +£1':'軟飲',
-  // 飲品 — set drink labels (same as single; with surcharge label kept)
-  '抹茶紅豆拿鐵 +£1':'抹茶拿鐵'
-};
-
-function shorten(name) {
-  return SHORT_NAMES[name] || name;
-}
-
-var SUGAR_SHORT = {'多糖':'多糖','正常':'正常糖','半糖':'半糖','少糖':'少糖','無糖':'無糖'};
-var ICE_SHORT   = {'多冰':'多冰','正常':'正常冰','少冰':'少冰','無冰 No Ice':'無冰'};
-var SPICE_EMOJI = {'小辣 Mild':'🌶️Mild','中辣 Medium':'🌶️🌶️Med','大辣 Hot':'🌶️🌶️🌶️Hot'};
-var TOAST_SHORT = {'花生醬 Peanut Butter':'花生醬','Nutella':'Nutella','開心果 Pistachio':'開心果'};
-
-// Extract key parts from a mods string
-// [2] Extract toast flavour from mods string
-function extractToastFlavour(modsStr) {
-  if (!modsStr) return '';
-  var TOAST_MAP = {
-    '花生醬 Peanut Butter':'花生醬',
-    'Nutella':'Nutella',
-    '開心果 Pistachio':'開心果',
-    'Pistachio':'開心果',
-    'Peanut':'花生醬'
-  };
-  var keys = Object.keys(TOAST_MAP);
-  for (var i=0;i<keys.length;i++) {
-    if (modsStr.indexOf(keys[i])>-1) return TOAST_MAP[keys[i]];
+  var tot = 0, h = '';
+  for (var i = 0; i < cart.length; i++) {
+    var it = cart[i], sub = it.p * it.qty; tot += sub;
+    var bc = it.st === 'water' ? 'bw' : (it.st === 'fire' ? 'bf' : 'bn');
+    var s = it.structured;
+    h += '<div class="crow"><span class="cbadge ' + bc + '">' + STATION_ICON[it.st] + ' ' + STATION_NAME[it.st].replace(' Station', '') + '</span>' +
+         '<div style="flex:1"><div class="cname">' + esc(it.name) + '</div>';
+    (it.summary || []).forEach(function(line){ h += '<div class="cmods">' + esc(line) + '</div>'; });
+    if (it.fireTops && it.fireTops.length) h += '<div class="cmods fire">🔥 Fire Station also prepares: ' + esc(it.fireTops.join(', ')) + '</div>';
+    h += '</div>' +
+         '<button class="qbtn" onclick="chgQty(' + i + ',-1)">−</button>' +
+         '<span class="qty">' + it.qty + '</span>' +
+         '<button class="qbtn" onclick="chgQty(' + i + ',1)">+</button>' +
+         '<span class="cprice">' + gbp(sub) + '</span></div>';
   }
-  return '';
+  l.innerHTML = h;
+  document.getElementById('tot').textContent = gbp(tot);
+  f.style.display = 'block';
 }
+function cartTotal() { var t = 0; for (var i = 0; i < cart.length; i++) t += cart[i].p * cart[i].qty; return r2(t); }
 
-// [8] Export orders as CSV
-function downloadCSV() {
-  if (!orderHistory.length) { alert('暫無訂單資料 No orders yet'); return; }
-  var rows = [];
-  // Header row
-  rows.push(['訂單編號','日期時間','枱號','商品','配料/飲品/要求','金額(£)','訂單總計(£)']);
-  var grandTotal = 0;
-  for (var i=0;i<orderHistory.length;i++) {
-    var o = orderHistory[i];
-    grandTotal += o.tot||0;
-    // Collect all items
-    var itemLines = [];
-    var modLines = [];
-    for (var j=0;j<o.items.length;j++) {
-      var it = o.items[j];
-      itemLines.push(it.zh + ' ×' + it.qty + ' £' + (it.p*it.qty).toFixed(2));
-      if (it.mods) modLines.push(it.mods);
-    }
-    if (o.rmk) modLines.push('備注：'+o.rmk);
-    var today = new Date();
-    var dateStr = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    rows.push([
-      '#'+o.no,
-      dateStr+' '+o.ts,
-      o.table||'',
-      '"'+itemLines.join('\n')+'"',
-      '"'+(modLines.join('\n')||'-')+'"',
-      (o.tot||0).toFixed(2),
-      '' // blank, filled in summary
-    ]);
+// ═════════════════════════════════════════════════════════════
+// WHATSAPP MESSAGE — built ONLY from structured data
+// ═════════════════════════════════════════════════════════════
+// One drink → lines. Only fields relevant to this drink are shown; hot drinks never show ice.
+function formatDrinkLine(d, qty, tag) {
+  var def = DRINKS[d.id];
+  var L = [def.name + ' ×' + qty + (tag ? ' [' + tag + ']' : '')];
+  if (def.type === 'soft') return L;
+  if (d.size) L.push('Size: ' + d.size + 'ml');
+  if (def.type === 'milktea' || def.type === 'matcha') L.push('Temperature: ' + (d.temp === 'hot' ? 'Hot' : 'Cold'));
+  if (d.milk)  L.push('Milk: ' + labelOf(MILK_OPTS, d.milk));
+  if (d.sugar) L.push('Sugar: ' + labelOf(SUGAR_OPTS, d.sugar));
+  if (d.temp !== 'hot' && d.ice) L.push('Ice: ' + labelOf(ICE_OPTS, d.ice));
+  if (d.toppings && d.toppings.length) L.push('Toppings: ' + d.toppings.map(drinkToppingLabel).join(', '));
+  return L;
+}
+function fireItemLines(it) {
+  var s = it.structured || {}, L = [it.name + ' ×' + it.qty];
+  if (s.side)    L.push('Side: ' + labelOf(MODS.side.opts, s.side));
+  if (s.sauce)   L.push('Sauce: ' + labelOf(MODS.sauce.opts, s.sauce));
+  if (s.filling) L.push('Filling: ' + labelOf(MODS.toast.opts, s.filling));
+  if (s.riceSauce && s.riceSauce !== 'none') L.push('Sauce: ' + labelOf(MODS.rice_sauce.opts, s.riceSauce));
+  return L;
+}
+function noodleItemLines(it) {
+  var s = it.structured || {}, L = [it.name + ' ×' + it.qty];
+  if (s.noodleBase) L.push('Noodle base: ' + labelOf(MODS.noodle_type.opts, s.noodleBase));
+  if (s.spice)      L.push('Spice: ' + labelOf(MODS.spice.opts, s.spice));
+  if (s.toppings && s.toppings.length) {
+    L.push('Toppings: ' + s.toppings.map(function(id){ return toppingName(id) + (routesToFire(id) ? ' [Fire]' : ''); }).join(', '));
   }
-  // Summary row
-  rows.push(['','','','','合計 GRAND TOTAL','',grandTotal.toFixed(2)]);
-
-  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
-  var BOM = '\uFEFF'; // UTF-8 BOM for Excel
-  var blob = new Blob([BOM+csv], {type:'text/csv;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  var now = new Date();
-  var fname = 'VOLCANO_orders_'+now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate()+'.csv';
-  a.href=url; a.download=fname;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  var g = (s.garnish || []).filter(function(id){ return id !== 'extra_noodles'; }).map(function(id){ return labelOf(GARNISH_OPTS, id); });
+  if (g.length) L.push('Garnish: ' + g.join(', '));
+  if (s.extraNoodles) L.push('Extra noodles');
+  return L;
 }
+function trimBlank(lines) { while (lines.length && lines[lines.length - 1] === '') lines.pop(); return lines; }
 
-function parseMods(modsStr) {
-  if (!modsStr) return {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:'',raw:[]};
-  var result = {spice:'',sugar:'',ice:'',milk:'',tops:[],drink:'',garnish:[],size:'',raw:[]};
-  var parts = modsStr.split(' · ');
-  result.raw = parts;
-
-  // All possible garnish labels
-  var GARNISH_LABELS = ['多葱','走葱','多芫茜','走芫茜','走芽菜','走腐皮','加底'];
-
-  for (var i=0;i<parts.length;i++) {
-    var p = parts[i].trim();
-    if (!p) continue;
-
-    // ── 辣度 Spice ──
-    if (p==='走辣 None'||p==='小辣 Mild'||p==='中辣 Medium'||p==='大辣 Hot') {
-      result.spice = SPICE_EMOJI[p] || p;
-    }
-    // ── 糖度 Sugar ──
-    else if (p==='多糖'||p==='正常'||p==='半糖'||p==='少糖'||p==='無糖') {
-      result.sugar = SUGAR_SHORT[p]||p;
-    }
-    // ── 冰度 Ice ──
-    else if (p==='多冰'||p==='正常'||p==='少冰'||p==='走冰') {
-      result.ice = ICE_SHORT[p]||p;
-    }
-    // ── 奶類 Milk ──
-    else if (p.indexOf('Oat')>-1||p.indexOf('燕麥')>-1) { result.milk='燕麥'; }
-    else if (p.indexOf('Whole')>-1||p.indexOf('全脂')>-1) { result.milk='全脂'; }
-    // ── 杯型 Size ──
-    else if (p.indexOf('700ml')>-1) { result.size='大杯'; }
-    // ── 配料 Toppings ──
-    else if (p.indexOf('配料：')===0||p.indexOf('配料:')===0) {
-      var topStr = p.replace('配料：','').replace('配料:','');
-      result.tops = topStr.split('、').map(function(t){return shorten(t.trim());}).filter(Boolean);
-    }
-    // ── 配菜要求 Garnish ──
-    else if (GARNISH_LABELS.indexOf(p.replace(' +£1',''))>-1||p.indexOf('加底')>-1) {
-      result.garnish.push(p.replace(' +£1',''));
-    }
-    // ── 追加飲品 Drink ──
-    else if (p==='不加') { /* skip */ }
-    else if (p.indexOf('珍奶')>-1||p.indexOf('茶')>-1||p.indexOf('拿鐵')>-1||p.indexOf('罐裝')>-1) {
-      result.drink = shorten(p);
-    }
-    else if (SHORT_NAMES[p]) { result.drink = SHORT_NAMES[p]; }
-    // ── 麵底 Noodle type ──
-    else if (p==='脆麵+咖喱'||p==='乾撈麵+蠔油') { result.drink=p; }
-    // ── 西多士餡料 Toast ──
-    else if (p.indexOf('Peanut')>-1) { result.drink='花生醬'; }
-    else if (p.indexOf('Hazelnut')>-1) { result.drink='榛子朱古力'; }
-    else if (p.indexOf('Pistachio')>-1) { result.drink='開心果'; }
-    else if (p.indexOf('Cheese')>-1&&p.indexOf('Foam')<0) { result.drink='芝士'; }
-    // ── 主食 Side ──
-    else if (p==='白飯 Rice') { result.size='白飯'; }
-    else if (p==='薯條 Chips') { result.size='薯條'; }
-    // ── 醬汁 Sauce ──
-    else if (p.indexOf('Curry')>-1) { result.sauce='咖喱'; }
-    else if (p.indexOf('Teriyaki')>-1) { result.sauce='照燒'; }
-  }
-  return result;
-}
-
-// Format one drink line: 黑糖珍奶｜少糖｜少冰｜燕麥
-function formatDrinkLine(drinkName, m) {
-  var parts = [shorten(drinkName)];
-  if (m.size && m.size!=='白飯'&&m.size!=='薯條') parts.push(m.size);
-  if (m.sugar) parts.push(m.sugar);
-  if (m.ice) parts.push(m.ice);
-  if (m.milk) parts.push(m.milk);
-  return parts.join('｜');
-}
-
-// ─────────────────────────────────────────
-// BUILD SMART STATION MESSAGES
-// ─────────────────────────────────────────
 function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, rmk, tot, noodleTaskItems) {
-  var now = new Date();
-  var hh=now.getHours(),mm=now.getMinutes();
-  var ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
-  var header = '🌋 #'+no+'  枱'+table+'  '+ts;
-  var divider = '─────────';
+  var ts = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+  var tag = ' | Order #' + no + ' | Table ' + table + ' | ' + ts;
+  var blocks = [];
 
-  // ── 🔥 FIRE STATION ──
-  var fireLines = [header, '🔥 火位', divider];
-  if (byStation['fire'] && byStation['fire'].length) {
-    for (var i=0;i<byStation['fire'].length;i++){
-      var it=byStation['fire'][i];
-      var m=parseMods(it.mods);
-      var s=it.structured;
-      var name=shorten(it.zh);
-      var qty=it.qty>1?'×'+it.qty:'';
-      var line=name+qty;
-      if(m.size&&(m.size==='白飯'||m.size==='薯條')) line+='  '+m.size;
-      // [1] Sauce: use structured if available, fallback to parseMods
-      var sauceVal=(s&&s.sauce)?s.sauce:(m.sauce||'');
-      if(sauceVal){
-        var sauceShort=sauceVal.indexOf('Curry')>-1||sauceVal.indexOf('咖喱')>-1?'喱':
-                       sauceVal.indexOf('Teriyaki')>-1||sauceVal.indexOf('照燒')>-1?'油':'';
-        if(sauceShort) line+='  汁：'+sauceShort;
-      }
-      // [2] Set F 西多：顯示口味 + [6] 配 side
-      if(it.zh.indexOf('西多')>-1){
-        var tf=extractToastFlavour(it.mods);
-        if(tf) line+='（'+tf+'）';
-        var sfs=(s&&s.setfSide)?s.setfSide.split(' ')[0]:'';
-        if(sfs) line+='  '+sfs;
-      }
-      fireLines.push(line);
-    }
+  // FIRE STATION: sets / appetizers + noodle toppings that Fire must prepare
+  var fire = [];
+  (byStation.fire || []).forEach(function(it){ fire = fire.concat(fireItemLines(it)); fire.push(''); });
+  if (fireTaskTops && fireTaskTops.length) {
+    fire.push('Noodle bowl toppings to prepare:');
+    fireTaskTops.forEach(function(t){ fire.push('• ' + t.name + ' ×' + t.qty); });
+    fire.push('');
   }
-  // Fire tasks from noodle toppings — bullet list
-  if (fireTaskTops.length>0) {
-    var ftMerged={};
-    for(var i=0;i<fireTaskTops.length;i++){var fs=shorten(fireTaskTops[i]);ftMerged[fs]=(ftMerged[fs]||0)+1;}
-    fireLines.push('加料：');
-    Object.keys(ftMerged).forEach(function(k){fireLines.push('• '+k+(ftMerged[k]>1?' ×'+ftMerged[k]:''));});
-  }
-  if (rmk) fireLines.push('📝 '+rmk);
-  fireLines.push('─────────');
+  if (fire.length) blocks.push(['FIRE STATION' + tag].concat(trimBlank(fire)));
 
-  // ── 🍜 NOODLE STATION — 使用結構化資料，保證完整顯示 ──
-  var noodleLines = [header, '🍜 麵位', divider];
-  if (byStation['noodle'] && byStation['noodle'].length) {
-    for (var i=0;i<byStation['noodle'].length;i++){
-      var it=byStation['noodle'][i];
-      var s=it.structured;
-      var name=shorten(it.zh);
-      var qty=it.qty>1?' ×'+it.qty:'';
+  // NOODLE STATION: the complete bowl, always
+  var noodle = [];
+  (byStation.noodle || []).forEach(function(it){ noodle = noodle.concat(noodleItemLines(it)); noodle.push(''); });
+  (noodleTaskItems || []).forEach(function(t){ noodle.push(t.label + ' ×' + t.qty); });
+  if (noodle.length) blocks.push(['NOODLE STATION' + tag].concat(trimBlank(noodle)));
 
-      // ── Fallback: parse from mods string if structured is missing ──
-      if (!s && it.mods) {
-        var mFB = parseMods(it.mods);
-        s = {
-          spice: mFB.spice ? Object.keys(SPICE_EMOJI).find(function(k){return SPICE_EMOJI[k]===mFB.spice;})||mFB.spice : '',
-          tops: mFB.tops||[],
-          garnish: mFB.garnish||[],
-          noodleDrink: mFB.drink||'',
-          sugar: mFB.sugar||'', ice: mFB.ice||'', milk: mFB.milk||''
-        };
-      }
+  // DRINKS STATION: standalone drinks + set-meal drinks + noodle add-on drinks, each with its own settings
+  var drinks = [];
+  (byStation.water || []).forEach(function(it){
+    if (it.structured && it.structured.drink) { drinks = drinks.concat(formatDrinkLine(it.structured.drink, it.qty, '')); drinks.push(''); }
+  });
+  (waterTaskNotes || []).forEach(function(w){
+    drinks = drinks.concat(formatDrinkLine(w.drink, w.qty, w.from === 'fire' ? 'Set meal' : 'Noodle bowl')); drinks.push('');
+  });
+  if (drinks.length) blocks.push(['DRINKS STATION' + tag].concat(trimBlank(drinks)));
 
-      // Line 1: 湯底 + 辣度
-      var spiceStr='';
-      if(s&&s.spice) spiceStr=' '+(SPICE_EMOJI[s.spice]||s.spice);
-      noodleLines.push(name+qty+spiceStr);
-
-      // Line 1b: 麵底選擇（always show）
-      if(s&&s.noodleNoodleType){
-        var ntShort=s.noodleNoodleType.indexOf('烏冬')>-1?'烏冬 +£0.50':
-                    s.noodleNoodleType.indexOf('韓國')>-1?'韓國麵 +£1.00':'米線';
-        noodleLines.push('麵底：'+ntShort);
-      }
-
-      // Line 2: 配料（完整列出每款）
-      if(s&&s.tops&&s.tops.length>0){
-        var tMerged={};
-        for(var j=0;j<s.tops.length;j++){var tk=shorten(s.tops[j]);tMerged[tk]=(tMerged[tk]||0)+1;}
-        var tParts=Object.keys(tMerged).map(function(k){return k+(tMerged[k]>1?' ×'+tMerged[k]:'');});
-        noodleLines.push('配：'+tParts.join('  '));
-      }
-
-      // Line 3: 走料 ❌ / 多料 ➕ / 加底
-      if(s&&s.garnish&&s.garnish.length>0){
-        var walks=[], adds=[], extra=false;
-        for(var j=0;j<s.garnish.length;j++){
-          var g=s.garnish[j];
-          if(g==='加底 +£1'||g==='加底') extra=true;
-          else if(g.indexOf('走')===0) walks.push(g.replace('走',''));
-          else if(g.indexOf('多')===0) adds.push(g);
-        }
-        if(walks.length>0) noodleLines.push('❌ '+walks.join(' '));
-        if(adds.length>0) noodleLines.push('➕ '+adds.join(' '));
-        if(extra) noodleLines.push('＋加底');
-      }
-
-      // Line 4: 追加飲品（如有）
-      if(s&&s.noodleDrink&&s.noodleDrink!=='不加'&&s.noodleDrink!==''){
-        var dParts=[shorten(s.noodleDrink)];
-        if(s.sugar) dParts.push(SUGAR_SHORT[s.sugar]||s.sugar);
-        if(s.ice) dParts.push(ICE_SHORT[s.ice]||s.ice);
-        if(s.milk&&(s.milk.indexOf('Oat')>-1||s.milk.indexOf('燕麥')>-1)) dParts.push('燕麥');
-        noodleLines.push('飲：'+dParts.join('｜'));
-      }
-
-      if(i < byStation['noodle'].length-1) noodleLines.push('');
-    }
-  }
-  // [3][4][5] Cross-routed items from fire station → noodle station
-  if(noodleTaskItems&&noodleTaskItems.length>0){
-    var dryNoodles=[], snacks=[];
-    for(var i=0;i<noodleTaskItems.length;i++){
-      if(noodleTaskItems[i].type==='noodle') dryNoodles.push(noodleTaskItems[i]);
-      else if(noodleTaskItems[i].type==='snack') snacks.push(noodleTaskItems[i]);
-    }
-    if(dryNoodles.length>0){
-      for(var i=0;i<dryNoodles.length;i++){
-        noodleLines.push(dryNoodles[i].label+(dryNoodles[i].qty>1?' ×'+dryNoodles[i].qty:''));
-      }
-    }
-    if(snacks.length>0){
-      noodleLines.push('小食：');
-      for(var i=0;i<snacks.length;i++){
-        noodleLines.push('• '+snacks[i].label+(snacks[i].qty>1?' ×'+snacks[i].qty:''));
-      }
-    }
-  }
-  if (rmk) noodleLines.push('📝 '+rmk);
-  noodleLines.push('─────────');
-  var waterLines = [header, '🥤 水吧', divider];
-  if (byStation['water'] && byStation['water'].length) {
-    for (var i=0;i<byStation['water'].length;i++){
-      var it=byStation['water'][i];
-      var m=parseMods(it.mods);
-      var s=it.structured;
-      var qty=it.qty>1?'×'+it.qty:'';
-      // Ice cream
-      if(it.zh.indexOf('雪糕')>-1){
-        var flavour=(s&&s.toastFilling)||'';
-        waterLines.push('雪糕'+qty+(flavour?'（'+flavour+'）':''));
-        continue;
-      }
-      // [9] Milk temp prefix
-      var tempPrefix='';
-      if(s&&s.milkTemp&&s.milkTemp.indexOf('熱')>-1) tempPrefix='熱 ';
-      // Build drink line
-      var dLine=tempPrefix+formatDrinkLine(it.zh,m)+qty;
-      waterLines.push(dLine);
-      // [7] Drink toppings
-      if(s&&s.drinkTops&&s.drinkTops.length>0){
-        var dtArr=s.drinkTops.split('、');
-        waterLines.push('配料：');
-        for(var j=0;j<dtArr.length;j++) waterLines.push('• '+dtArr[j].trim());
-      }
-    }
-  }
-  for(var i=0;i<waterTaskNotes.length;i++){
-    var wt=waterTaskNotes[i];
-    var drinkName='';
-    var m2={sugar:'',ice:'',milk:'',size:''};
-    var drinkTopLine='';  // collect 配料 from waterNotes
-    for(var j=0;j<wt.notes.length;j++){
-      var n=wt.notes[j];
-      if(n.indexOf('配料：')===0||n.indexOf('配料:')===0){
-        // Extract only drink toppings — exclude food toppings which look like "配料：牛丸、雲吞"
-        // drinkTops only contains DRINK_TOPPINGS names (Tapioca, Popping Ball, etc.)
-        drinkTopLine = n;
-      } else if(SHORT_NAMES[n]){drinkName=SHORT_NAMES[n];}
-      else if(SUGAR_SHORT[n]){m2.sugar=SUGAR_SHORT[n];}
-      else if(ICE_SHORT[n]){m2.ice=ICE_SHORT[n];}
-      else if(n.indexOf('Oat')>-1){m2.milk='燕麥';}
-      else if(n.indexOf('700ml')>-1){m2.size='大杯';}
-    }
-    if(drinkName){
-      var prefix=wt.from==='fire'?'[套餐]':'[麵位]';
-      waterLines.push(prefix+' '+formatDrinkLine(drinkName,m2));
-      // Output drink toppings on the next line if present
-      if(drinkTopLine) waterLines.push(drinkTopLine);
-    }
-  }
-  if (rmk) waterLines.push('📝 '+rmk);
-  waterLines.push('─────────');
-
-  // ── COMBINED MESSAGE (all stations in one) ──
-  var combined = [];
-  combined.push(header);
-  combined.push('');
-
-  if (byStation['fire']&&byStation['fire'].length||fireTaskTops.length>0) {
-    combined.push('🔥 火位');
-    combined = combined.concat(fireLines.slice(3, fireLines.length-1));
-    combined.push('');
-  }
-  if (byStation['noodle']&&byStation['noodle'].length||(noodleTaskItems&&noodleTaskItems.length>0)) {
-    combined.push('🍜 麵位');
-    combined = combined.concat(noodleLines.slice(3, noodleLines.length-1));
-    combined.push('');
-  }
-  if (byStation['water']&&byStation['water'].length||waterTaskNotes.length>0) {
-    combined.push('🥤 水吧');
-    combined = combined.concat(waterLines.slice(3, waterLines.length-1));
-    combined.push('');
-  }
-
-  if (rmk) { combined.push('📝 '+rmk); combined.push(''); }
-  combined.push('合計 £'+tot.toFixed(2));
-
-  return combined.join('\n');
+  var out = [];
+  blocks.forEach(function(b, i){ if (i) out.push(''); out = out.concat(b); });
+  if (rmk) { out.push(''); out.push('Note: ' + rmk); }
+  out.push(''); out.push('Total: ' + gbp(tot));
+  return out.join('\n');
 }
 
 function copyToClipboard(text) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    return navigator.clipboard.writeText(text);
-  }
-  // fallback
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
   var ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.position = 'fixed';
-  ta.style.opacity = '0';
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
-  try { document.execCommand('copy'); } catch(e){}
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
   document.body.removeChild(ta);
   return Promise.resolve();
 }
-
-// ─────────────────────────────────────────
-// SEND ORDER → COPY TEXT + OPEN WHATSAPP GROUP
-// ─────────────────────────────────────────
-function sendOrder(){
-  if(!cart.length) return;
-  if(!currentTable){document.getElementById('table-warn').style.display='block';return;}
-  var rmk=document.getElementById('rmk').value.trim();
-  var tot=0; for(var i=0;i<cart.length;i++) tot+=cart[i].p*cart[i].qty;
-  var no=String(oNo++); while(no.length<3) no='0'+no;
-
-  var byStation={};
-  var fireTaskTops=[];
-  var waterTaskNotes=[];
-  var noodleTaskItems=[];
-
-  for(var i=0;i<cart.length;i++){
-    var it=cart[i];
-    if(!byStation[it.st]) byStation[it.st]=[];
-    byStation[it.st].push({zh:it.zh,en:it.en,p:it.p,qty:it.qty,mods:it.mods,structured:it.structured||null});
-
-    // ── Topping fire routing: already resolved in confirmMod via ROUTING,
-    //    stored in it.fireTops — just collect them
-    if(it.st==='noodle'&&it.fireTops&&it.fireTops.length>0){
-      for(var j=0;j<it.fireTops.length;j++){
-        if(fireTaskTops.indexOf(it.fireTops[j])<0) fireTaskTops.push(it.fireTops[j]);
-      }
-    }
-
-    // ── Fire item cross-routing to noodle: use ROUTING table ──
-    if(it.st==='fire'&&routesToNoodle(it.zh)){
-      var taskType=it.zh==='牛肉丸 (6粒)'?'snack':'noodle';
-      var taskLabel=it.zh==='牛肉丸 (6粒)'?'牛丸':shorten(it.zh);
-      noodleTaskItems.push({type:taskType,label:taskLabel,qty:it.qty,src:it.zh});
-    }
-
-    // ── Water notes (drinks) ──
-    if((it.st==='fire'||it.st==='noodle')&&it.waterNotes&&it.waterNotes.length>0){
-      waterTaskNotes.push({notes:it.waterNotes,from:it.st});
-    }
-  }
-
-  var fullMsg = buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, currentTable, no, rmk, tot, noodleTaskItems);
-
-  // Copy to clipboard then open the group
-  copyToClipboard(fullMsg).then(function(){
-    showCopyToast();
-    setTimeout(function(){
-      window.open(WA_GROUP_LINK, '_blank');
-    }, 400);
-  }).catch(function(){
-    // Even if copy fails, still open the group
-    setTimeout(function(){
-      window.open(WA_GROUP_LINK, '_blank');
-    }, 200);
-  });
-
-  // Save to history
-  orderHistory.unshift({no:no, table:currentTable, items:cart.slice(), tot:tot, rmk:rmk, ts:new Date().toLocaleTimeString('zh-HK',{hour:'2-digit',minute:'2-digit'})});
-  saveHistory();
-  renderHistory();
-
-  cart=[];
-  document.getElementById('rmk').value='';
-  renderCart();
-}
-
-function showCopyToast(){
+function showCopyToast() {
   var el = document.createElement('div');
-  el.textContent = '✅ 已複製訂單內容！打開 WhatsApp 後請長按輸入欄「貼上」';
+  el.textContent = '✅ Order copied. In WhatsApp, long-press the message box and choose Paste.';
   el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#25D366;color:#fff;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;z-index:9999;max-width:90%;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.2)';
   document.body.appendChild(el);
   setTimeout(function(){ el.remove(); }, 3500);
 }
 
-// ─────────────────────────────────────────
-// HISTORY VIEW
-// ─────────────────────────────────────────
-function renderHistory(){
+// ═════════════════════════════════════════════════════════════
+// PLACE ORDER → copy message + open WhatsApp group
+// ═════════════════════════════════════════════════════════════
+function collectOrder(items) {
+  var byStation = {}, fireMap = {}, fireOrder = [], waterTaskNotes = [], noodleTaskItems = [];
+  items.forEach(function(it){
+    if (!byStation[it.st]) byStation[it.st] = [];
+    byStation[it.st].push({id: it.id, name: it.name, qty: it.qty, p: it.p, mods: it.mods, summary: it.summary, structured: it.structured || null});
+    var s = it.structured;
+    if (!s) return;
+    // noodle toppings routed to Fire Station (routing by topping id, not by name)
+    if (it.st === 'noodle') {
+      fireToppingIds(s).forEach(function(id){
+        if (!fireMap[id]) { fireMap[id] = {id: id, name: toppingName(id), qty: 0}; fireOrder.push(id); }
+        fireMap[id].qty += it.qty;
+      });
+    }
+    // drinks that come with a set meal or a noodle bowl → Drinks Station, with their own settings
+    if ((it.st === 'fire' || it.st === 'noodle') && s.drink) {
+      waterTaskNotes.push({from: it.st, qty: it.qty, parent: it.name, drink: cleanDrink(s.drink)});
+    }
+  });
+  return {
+    byStation: byStation,
+    fireTaskTops: fireOrder.map(function(id){ return fireMap[id]; }),
+    waterTaskNotes: waterTaskNotes,
+    noodleTaskItems: noodleTaskItems
+  };
+}
+
+function sendOrder() {
+  if (!cart.length) return;
+  if (!currentTable) { document.getElementById('table-warn').style.display = 'block'; return; }
+  var rmk = document.getElementById('rmk').value.trim();
+  var tot = cartTotal();
+  var no = String(oNo++); while (no.length < 3) no = '0' + no;
+  var c = collectOrder(cart);
+  var fullMsg = buildSmartMessages(c.byStation, c.fireTaskTops, c.waterTaskNotes, currentTable, no, rmk, tot, c.noodleTaskItems);
+
+  copyToClipboard(fullMsg).then(function(){
+    showCopyToast();
+    setTimeout(function(){ window.open(WA_GROUP_LINK, '_blank'); }, 400);
+  }).catch(function(){
+    setTimeout(function(){ window.open(WA_GROUP_LINK, '_blank'); }, 200);
+  });
+
+  var now = new Date();
+  orderHistory.unshift({
+    no: no, table: currentTable, items: JSON.parse(JSON.stringify(cart)), tot: tot, rmk: rmk,
+    ts: now.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}), iso: now.toISOString()
+  });
+  saveHistory();
+  renderHistory();
+  cart = [];
+  document.getElementById('rmk').value = '';
+  renderCart();
+  return fullMsg;
+}
+
+// ═════════════════════════════════════════════════════════════
+// HISTORY (old records are kept untouched; they simply render with whatever fields they have)
+// ═════════════════════════════════════════════════════════════
+function renderHistory() {
   var el = document.getElementById('history-body');
-  if (!orderHistory.length) { el.innerHTML='<div class="no-orders">暫無歷史訂單</div>'; return; }
-  var h='';
-  for (var i=0;i<orderHistory.length;i++){
-    var o=orderHistory[i];
-    var itemsTxt = o.items.map(function(it){return it.zh+'×'+it.qty;}).join('、');
-    h+='<div class="history-card">'+
-      '<div class="history-top"><span class="history-table">枱 '+o.table+'</span><span class="history-time">#'+o.no+' · '+o.ts+'</span></div>'+
-      '<div class="history-items">'+itemsTxt+'</div>'+
-      '<div class="history-tot" style="margin-top:6px">£'+o.tot.toFixed(2)+'</div>'+
-      '</div>';
+  if (!orderHistory.length) { el.innerHTML = '<div class="no-orders">No order history yet</div>'; return; }
+  var h = '';
+  for (var i = 0; i < orderHistory.length; i++) {
+    var o = orderHistory[i];
+    h += '<div class="history-card">' +
+         '<div class="history-top"><span class="history-table">Table ' + esc(o.table) + '</span><span class="history-time">#' + esc(o.no) + ' · ' + esc(o.ts) + '</span></div>' +
+         '<div class="history-items">';
+    o.items.forEach(function(it){
+      h += '<div>' + esc(it.name || it.zh) + ' ×' + it.qty + '</div>';
+      var sub = it.summary || (it.mods ? [it.mods] : []);
+      sub.forEach(function(line){ h += '<div class="hsub">' + esc(line) + '</div>'; });
+    });
+    h += '</div><div class="history-tot" style="margin-top:6px">' + gbp(o.tot) + '</div></div>';
   }
-  el.innerHTML=h;
+  el.innerHTML = h;
+}
+function saveHistory() {
+  try { localStorage.setItem('volcano_history', JSON.stringify({history: orderHistory, oNo: oNo})); } catch (e) {}
+}
+function loadHistory() {
+  try { var r = localStorage.getItem('volcano_history'); if (r) { var d = JSON.parse(r); if (d.history) { orderHistory = d.history; oNo = d.oNo || 1; } } } catch (e) {}
+}
+function clearHistory() {
+  if (!confirm('Clear all order history? This cannot be undone.')) return;
+  orderHistory = []; oNo = 1; saveHistory(); renderHistory(); closeManage();
 }
 
-function saveHistory(){
-  try{ localStorage.setItem('volcano_history', JSON.stringify({history:orderHistory,oNo:oNo})); }catch(e){}
+// ═════════════════════════════════════════════════════════════
+// CSV EXPORT
+// ═════════════════════════════════════════════════════════════
+function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+function buildCSV() {
+  var rows = [['Order No', 'Date', 'Time', 'Table', 'Items', 'Options / toppings / drinks / notes', 'Order Total (£)']];
+  var grand = 0;
+  orderHistory.forEach(function(o){
+    grand += o.tot || 0;
+    var items = [], opts = [];
+    o.items.forEach(function(it){
+      var nm = it.name || it.zh;
+      items.push(nm + ' ×' + it.qty + ' (' + gbp(it.p * it.qty) + ')');
+      var sub = it.summary || (it.mods ? [it.mods] : []);
+      if (sub.length) opts.push(nm + ': ' + sub.join('; '));
+    });
+    if (o.rmk) opts.push('Order note: ' + o.rmk);
+    rows.push(['#' + o.no, o.iso ? new Date(o.iso).toLocaleDateString('en-GB') : '', o.ts, o.table, items.join('\n'), opts.join('\n'), (o.tot || 0).toFixed(2)]);
+  });
+  rows.push(['', '', '', '', '', 'GRAND TOTAL', grand.toFixed(2)]);
+  return rows.map(function(r){ return r.map(csvCell).join(','); }).join('\n');
 }
-function loadHistory(){
-  try{ var r=localStorage.getItem('volcano_history'); if(r){var d=JSON.parse(r); if(d.history){orderHistory=d.history;oNo=d.oNo||1;}} }catch(e){}
-}
-function clearHistory(){
-  if(!confirm('確認清除所有歷史訂單？\nConfirm clear all order history?')) return;
-  orderHistory=[]; oNo=1; saveHistory(); renderHistory(); closeManage();
+function downloadCSV() {
+  if (!orderHistory.length) { alert('No orders to export yet.'); return; }
+  var blob = new Blob(['\uFEFF' + buildCSV()], {type: 'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'), now = new Date();
+  a.href = url; a.download = 'VOLCANO_orders_' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
-// ─────────────────────────────────────────
-// MANAGE / PAUSE + WHATSAPP NUMBERS DISPLAY
-// ─────────────────────────────────────────
-function openManage(){
-  var stNames={water:'💧 水吧',fire:'🔥 火位',noodle:'🍜 麵位'};
-  var stKeys=['water','fire','noodle'];
-  var h='<div class="modal-handle"></div><div class="modal-title" style="margin-bottom:10px">管理 Manage</div>';
-
-  h+='<div class="wa-info">📲 訂單會複製到剪貼簿，並打開以下 WhatsApp 群組（請手動貼上發送）</div>';
-  h+='<div class="wa-row"><span class="wa-station">🌋 訂單群組</span><span class="wa-num" style="font-size:10px;word-break:break-all">'+WA_GROUP_LINK+'</span></div>';
-
-  h+='<div style="display:flex;gap:8px;margin-bottom:14px">'+
-    '<button onclick="downloadCSV()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--noodle);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📥 匯出訂單 CSV</button>'+
-    '<button onclick="clearHistory()" style="flex:1;padding:10px;border:1px solid #c0392b;border-radius:10px;background:transparent;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑 清除歷史</button>'+
-    '</div>';
-  h+='<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">暫停菜式 Pause Items</div>';
-  for(var s=0;s<stKeys.length;s++){
-    var st=stKeys[s];
-    h+='<div class="manage-sec">'+stNames[st]+'</div>';
-    for(var i=0;i<MENU_ITEMS.length;i++){
-      if(MENU_ITEMS[i].st!==st) continue;
-      var ip=!!pausedItems[i];
-      h+='<div class="manage-row"><span class="manage-name">'+MENU_ITEMS[i].zh+'</span>'+
-        '<span class="manage-price">£'+MENU_ITEMS[i].p.toFixed(2)+'</span>'+
-        '<button class="pause-btn'+(ip?' paused':'')+'" onclick="togglePause('+i+')">'+(ip?'恢復 Resume':'暫停 Pause')+'</button></div>';
+// ═════════════════════════════════════════════════════════════
+// MANAGE (pause items are stored by item id)
+// ═════════════════════════════════════════════════════════════
+function openManage() {
+  var stKeys = ['water', 'fire', 'noodle'];
+  var h = '<div class="modal-handle"></div><div class="modal-title" style="margin-bottom:10px">Manage</div>';
+  h += '<div class="wa-info">📲 Orders are copied to the clipboard and this WhatsApp group opens (paste and send manually).</div>';
+  h += '<div class="wa-row"><span class="wa-station">🌋 Order group</span><span class="wa-num" style="font-size:10px;word-break:break-all">' + esc(WA_GROUP_LINK) + '</span></div>';
+  h += '<div style="display:flex;gap:8px;margin-bottom:14px">' +
+       '<button onclick="downloadCSV()" style="flex:1;padding:10px;border:none;border-radius:10px;background:var(--noodle);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📥 Export orders (CSV)</button>' +
+       '<button onclick="clearHistory()" style="flex:1;padding:10px;border:1px solid #c0392b;border-radius:10px;background:transparent;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑 Clear history</button></div>';
+  h += '<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">Pause items</div>';
+  for (var s = 0; s < stKeys.length; s++) {
+    var st = stKeys[s];
+    h += '<div class="manage-sec">' + STATION_ICON[st] + ' ' + STATION_NAME[st] + '</div>';
+    for (var i = 0; i < MENU_ITEMS.length; i++) {
+      var it = MENU_ITEMS[i];
+      if (it.st !== st) continue;
+      var ip = !!pausedItems[it.id];
+      h += '<div class="manage-row"><span class="manage-name">' + esc(it.name) + '</span>' +
+           '<span class="manage-price">' + gbp(it.p) + '</span>' +
+           '<button class="pause-btn' + (ip ? ' paused' : '') + '" onclick="togglePause(\'' + it.id + '\')">' + (ip ? 'Resume' : 'Pause') + '</button></div>';
     }
   }
-  h+='<div style="margin-top:16px"><button onclick="closeManage()" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--text);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">關閉 Close</button></div>';
-  document.getElementById('manage-sheet').innerHTML=h;
+  h += '<div style="margin-top:16px"><button onclick="closeManage()" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--text);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Close</button></div>';
+  document.getElementById('manage-sheet').innerHTML = h;
   document.getElementById('manage-overlay').classList.add('on');
 }
-function closeManage(){ document.getElementById('manage-overlay').classList.remove('on'); }
-function togglePause(idx){
-  pausedItems[idx]=!pausedItems[idx];
-  try{localStorage.setItem('volcano_paused',JSON.stringify(pausedItems));}catch(e){}
+function closeManage() { document.getElementById('manage-overlay').classList.remove('on'); }
+function togglePause(id) {
+  pausedItems[id] = !pausedItems[id];
+  try { localStorage.setItem('volcano_paused_v2', JSON.stringify(pausedItems)); } catch (e) {}
   buildPanels(); openManage();
 }
-document.getElementById('manage-overlay').addEventListener('click',function(e){if(e.target===this)closeManage();});
+document.getElementById('manage-overlay').addEventListener('click', function(e){ if (e.target === this) closeManage(); });
 
-// ─────────────────────────────────────────
-// SWITCH
-// ─────────────────────────────────────────
-function stabSwitch(t){
-  var tabs=['water','fire','noodle'];
-  for(var i=0;i<tabs.length;i++){var x=tabs[i];document.getElementById('p-'+x).classList[x===t?'add':'remove']('on');document.getElementById('tb-'+x).className='stab'+(x===t?' on-'+x:'');}
+// ═════════════════════════════════════════════════════════════
+// TABS / VIEWS
+// ═════════════════════════════════════════════════════════════
+function stabSwitch(t) {
+  var tabs = ['water', 'fire', 'noodle'];
+  for (var i = 0; i < tabs.length; i++) {
+    var x = tabs[i];
+    document.getElementById('p-' + x).classList[x === t ? 'add' : 'remove']('on');
+    document.getElementById('tb-' + x).className = 'stab' + (x === t ? ' on-' + x : '');
+  }
 }
-function vswitch(v){
-  document.getElementById('view-order').classList[v==='order'?'add':'remove']('on');
-  document.getElementById('view-history').classList[v==='history'?'add':'remove']('on');
-  document.getElementById('vv-order').classList[v==='order'?'add':'remove']('on');
-  document.getElementById('vv-history').classList[v==='history'?'add':'remove']('on');
-  if(v==='history') renderHistory();
+function vswitch(v) {
+  document.getElementById('view-order').classList[v === 'order' ? 'add' : 'remove']('on');
+  document.getElementById('view-history').classList[v === 'history' ? 'add' : 'remove']('on');
+  document.getElementById('vv-order').classList[v === 'order' ? 'add' : 'remove']('on');
+  document.getElementById('vv-history').classList[v === 'history' ? 'add' : 'remove']('on');
+  if (v === 'history') renderHistory();
 }
 
-// ─────────────────────────────────────────
-// INIT (wrapped in try-catch for safety + visible error display)
-// ─────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════
+// INIT
+// ═════════════════════════════════════════════════════════════
 function showFatalError(msg) {
   var el = document.createElement('div');
   el.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;padding:12px;font-size:12px;z-index:9999;font-family:monospace;white-space:pre-wrap;';
-  el.textContent = '⚠️ 載入錯誤 Load Error:\n' + msg;
+  el.textContent = '⚠️ Load error:\n' + msg;
   document.body.appendChild(el);
 }
-
 try {
-  try{var pp=localStorage.getItem('volcano_paused');if(pp)pausedItems=JSON.parse(pp);}catch(e){}
+  // pause state now keyed by item id → the old index-based key ('volcano_paused') is deliberately ignored
+  try { var pp = localStorage.getItem('volcano_paused_v2'); if (pp) pausedItems = JSON.parse(pp); } catch (e) {}
   loadHistory();
   buildTableBtns();
   buildPanels();
   renderHistory();
-} catch(initErr) {
-  showFatalError(initErr.message + '\n' + (initErr.stack||''));
+} catch (initErr) {
+  showFatalError(initErr.message + '\n' + (initErr.stack || ''));
 }
-
-window.addEventListener('error', function(e){
-  showFatalError(e.message + ' (line ' + e.lineno + ')');
-});
+window.addEventListener('error', function(e){ showFatalError(e.message + ' (line ' + e.lineno + ')'); });
 </script>
 </body>
 </html>

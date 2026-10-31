@@ -925,76 +925,116 @@ function cartTotal() { var t = 0; for (var i = 0; i < cart.length; i++) t += car
 // ═════════════════════════════════════════════════════════════
 // WHATSAPP MESSAGE — built ONLY from structured data
 // ═════════════════════════════════════════════════════════════
-// One drink → lines. Only fields relevant to this drink are shown; hot drinks never show ice.
+// ── WhatsApp-only short names, looked up by item id. POS / cart / history names are NOT changed.
+//    Anything not listed falls back to its full name. Names are only shortened where the short form stays unambiguous. ──
+var WA_SHORT = {
+  set_wings:'Wings Set', set_tofu:'Teriyaki Tofu Set', set_brisket:'Brisket Set', set_leg:'Chicken Leg Set',
+  app_wonton:'Fried Wonton (6 pcs)', app_oysters:'Fried Oysters (4 pcs)', app_cumin:'Cumin Wings (5 pcs)',
+  app_squid:'Salt & Pepper Squid', app_tofu:'Teriyaki Tofu', app_crisps:'Seasoned Crisps',
+  app_rice:'Steamed Rice', app_toast:'HK French Toast',
+  soup_tomato:'Tomato', soup_hs_mala:'Hot & Sour Mala', soup_hs:'Hot & Sour', soup_mala:'Mala', soup_broth:'Chicken Broth'
+};
+var WA_SHORT_TOPPING = {
+  beef_ball:'Beef Ball', shrimp_wonton:'Wonton', cheese_fish_tofu:'Cheese Fish Tofu', fish_ball:'Fish Ball',
+  cuttlefish_ball:'Cuttlefish Ball', beef_slices:'Beef Slices', beef_shin:'Beef Shin', braised_tofu:'Braised Tofu',
+  braised_wings:'Braised Wings', braised_egg:'Braised Egg', bean_curd_puff:'Bean Curd Puff', bean_curd_sheet:'Bean Curd Sheet',
+  bean_sprouts:'Bean Sprouts', pickled_mustard:'Pickled Greens', cumin_wings:'Cumin Wings',
+  fish_spring_roll:'Fish Spring Roll', fried_fish_roll:'Fried Fish Spring Roll',   // kept in full so the two rolls can never be confused
+  beef_brisket:'Brisket & Tendon', chicken_leg:'Chicken Leg'
+};
+var WA_SHORT_DRINK = {
+  tw_milk_tea:'Taiwanese Milk Tea', bs_milk_tea:'Brown Sugar Milk Tea', choc_milk_tea:'Chocolate Milk Tea', coconut_milk_tea:'Coconut Milk Tea',
+  mango_tea:'Mango Tea', lychee_tea:'Lychee Tea', peach_tea:'White Peach Tea', lemon_tea:'Lemon Tea',
+  matcha:'Matcha Latte', soft:'Soft Drink'
+};
+var WA_SHORT_BASE  = {rice:'Rice Noodle', udon:'Udon', korean:'Korean Noodles'};
+var WA_SHORT_SAUCE = {curry:'Curry', teriyaki:'Teriyaki'};
+
+function waName(it)       { return WA_SHORT[it.id] || it.name; }
+function waTopping(id)    { return WA_SHORT_TOPPING[id] || toppingName(id); }
+function waDrinkName(id)  { return WA_SHORT_DRINK[id] || (DRINKS[id] ? DRINKS[id].name : id); }
+function waTable(t)       { return /^takeaway$/i.test(String(t)) ? 'Takeaway' : 'T' + t; }
+
+// One drink → lines:  name ×qty [tag] / size · sugar · ice / temperature · milk / toppings.
+// Values are the exact saved selections (nothing defaulted); hot drinks never show ice.
 function formatDrinkLine(d, qty, tag) {
   var def = DRINKS[d.id];
-  var L = [def.name + ' ×' + qty + (tag ? ' [' + tag + ']' : '')];
+  var L = [waDrinkName(d.id) + ' ×' + qty + (tag ? ' [' + tag + ']' : '')];
   if (def.type === 'soft') return L;
-  if (d.size) L.push('Size: ' + d.size + 'ml');
-  if (def.type === 'milktea' || def.type === 'matcha') L.push('Temperature: ' + (d.temp === 'hot' ? 'Hot' : 'Cold'));
-  if (d.milk)  L.push('Milk: ' + labelOf(MILK_OPTS, d.milk));
-  if (d.sugar) L.push('Sugar: ' + labelOf(SUGAR_OPTS, d.sugar));
-  if (d.temp !== 'hot' && d.ice) L.push('Ice: ' + labelOf(ICE_OPTS, d.ice));
+  var l2 = [];
+  if (d.size)  l2.push(d.size + 'ml');
+  if (d.sugar) l2.push(labelOf(SUGAR_OPTS, d.sugar));
+  if (d.temp !== 'hot' && d.ice) l2.push(labelOf(ICE_OPTS, d.ice));
+  if (l2.length) L.push(l2.join(' · '));
+  if (def.type === 'milktea' || def.type === 'matcha') {
+    var l3 = [d.temp === 'hot' ? 'Hot' : 'Cold'];
+    if (d.milk) l3.push(labelOf(MILK_OPTS, d.milk));
+    L.push(l3.join(' · '));
+  }
   if (d.toppings && d.toppings.length) L.push('Toppings: ' + d.toppings.map(drinkToppingLabel).join(', '));
   return L;
 }
 function fireItemLines(it) {
-  var s = it.structured || {}, L = [it.name + ' ×' + it.qty];
-  if (s.side)    L.push('Side: ' + labelOf(MODS.side.opts, s.side));
-  if (s.sauce)   L.push('Sauce: ' + labelOf(MODS.sauce.opts, s.sauce));
-  if (s.filling) L.push('Filling: ' + labelOf(MODS.toast.opts, s.filling));
-  if (s.riceSauce && s.riceSauce !== 'none') L.push('Sauce: ' + labelOf(MODS.rice_sauce.opts, s.riceSauce));
+  var s = it.structured || {}, L = [waName(it) + ' ×' + it.qty], l2 = [];
+  if (s.side)  l2.push(labelOf(MODS.side.opts, s.side));
+  if (s.sauce) l2.push('Sauce: ' + (WA_SHORT_SAUCE[s.sauce] || labelOf(MODS.sauce.opts, s.sauce)));
+  if (l2.length) L.push(l2.join(' · '));
+  if (s.filling) L.push(labelOf(MODS.toast.opts, s.filling));
+  if (s.riceSauce && s.riceSauce !== 'none') L.push('Sauce: ' + (WA_SHORT_SAUCE[s.riceSauce] || labelOf(MODS.rice_sauce.opts, s.riceSauce)));
   return L;
 }
 function noodleItemLines(it) {
-  var s = it.structured || {}, L = [it.name + ' ×' + it.qty];
-  if (s.noodleBase) L.push('Noodle base: ' + labelOf(MODS.noodle_type.opts, s.noodleBase));
-  if (s.spice)      L.push('Spice: ' + labelOf(MODS.spice.opts, s.spice));
+  var s = it.structured || {}, L = [waName(it) + ' ×' + it.qty], l2 = [];
+  if (s.noodleBase) l2.push(WA_SHORT_BASE[s.noodleBase] || labelOf(MODS.noodle_type.opts, s.noodleBase));
+  if (s.spice)      l2.push(labelOf(MODS.spice.opts, s.spice));
+  if (l2.length) L.push(l2.join(' · '));
   if (s.toppings && s.toppings.length) {
-    L.push('Toppings: ' + s.toppings.map(function(id){ return toppingName(id) + (routesToFire(id) ? ' [Fire]' : ''); }).join(', '));
+    L.push((s.toppings.length > 1 ? 'Toppings: ' : 'Topping: ') +
+           s.toppings.map(function(id){ return waTopping(id) + (routesToFire(id) ? ' (Fire)' : ''); }).join(', '));
   }
   var g = (s.garnish || []).filter(function(id){ return id !== 'extra_noodles'; }).map(function(id){ return labelOf(GARNISH_OPTS, id); });
-  if (g.length) L.push('Garnish: ' + g.join(', '));
-  if (s.extraNoodles) L.push('Extra noodles');
+  if (g.length) L.push(g.join(', '));
+  if (s.extraNoodles) L.push('Extra Noodles');
   return L;
 }
 function trimBlank(lines) { while (lines.length && lines[lines.length - 1] === '') lines.pop(); return lines; }
 
+// Compact kitchen message. No prices / totals (those stay in the POS, cart and history).
+// `tot` is still accepted so the call in sendOrder() is unchanged.
 function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, rmk, tot, noodleTaskItems) {
-  var ts = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
-  var tag = ' | Order #' + no + ' | Table ' + table + ' | ' + ts;
-  var blocks = [];
-
-  // FIRE STATION: sets / appetizers + noodle toppings that Fire must prepare
-  var fire = [];
-  (byStation.fire || []).forEach(function(it){ fire = fire.concat(fireItemLines(it)); fire.push(''); });
-  if (fireTaskTops && fireTaskTops.length) {
-    fire.push('Noodle bowl toppings to prepare:');
-    fireTaskTops.forEach(function(t){ fire.push('• ' + t.name + ' ×' + t.qty); });
-    fire.push('');
+  var ts  = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+  var tag = ' | #' + no + ' | ' + waTable(table) + ' | ' + ts;
+  // a block = header + groups; groups (one per item) are separated by a blank line so each item's details stay with it
+  function block(name, groups) {
+    var out = [name + tag];
+    groups.forEach(function(g, i){ if (i) out.push(''); out = out.concat(g); });
+    return out;
   }
-  if (fire.length) blocks.push(['FIRE STATION' + tag].concat(trimBlank(fire)));
+  var out = [];
 
-  // NOODLE STATION: the complete bowl, always
-  var noodle = [];
-  (byStation.noodle || []).forEach(function(it){ noodle = noodle.concat(noodleItemLines(it)); noodle.push(''); });
-  (noodleTaskItems || []).forEach(function(t){ noodle.push(t.label + ' ×' + t.qty); });
-  if (noodle.length) blocks.push(['NOODLE STATION' + tag].concat(trimBlank(noodle)));
+  // FIRE: sets / appetizers + noodle toppings that Fire must prepare
+  var fireG = (byStation.fire || []).map(fireItemLines);
+  if (fireTaskTops && fireTaskTops.length) {
+    fireG.push(fireTaskTops.map(function(t){ return waTopping(t.id) + ' ×' + t.qty + ' (for Noodle)'; }));
+  }
+  if (fireG.length) out = out.concat(block('FIRE', fireG));
 
-  // DRINKS STATION: standalone drinks + set-meal drinks + noodle add-on drinks, each with its own settings
-  var drinks = [];
+  // NOODLE: the complete bowl, always
+  var noodleG = (byStation.noodle || []).map(noodleItemLines);
+  if (noodleTaskItems && noodleTaskItems.length) noodleG.push(noodleTaskItems.map(function(t){ return t.label + ' ×' + t.qty; }));
+  if (noodleG.length) out = out.concat(block('NOODLE', noodleG));
+
+  // DRINKS: standalone drinks + set-meal drinks + noodle add-on drinks, each with its own settings
+  var drinkG = [];
   (byStation.water || []).forEach(function(it){
-    if (it.structured && it.structured.drink) { drinks = drinks.concat(formatDrinkLine(it.structured.drink, it.qty, '')); drinks.push(''); }
+    if (it.structured && it.structured.drink) drinkG.push(formatDrinkLine(it.structured.drink, it.qty, ''));
   });
   (waterTaskNotes || []).forEach(function(w){
-    drinks = drinks.concat(formatDrinkLine(w.drink, w.qty, w.from === 'fire' ? 'Set meal' : 'Noodle bowl')); drinks.push('');
+    drinkG.push(formatDrinkLine(w.drink, w.qty, w.from === 'fire' ? 'Set' : 'Noodle'));
   });
-  if (drinks.length) blocks.push(['DRINKS STATION' + tag].concat(trimBlank(drinks)));
+  if (drinkG.length) out = out.concat(block('DRINKS', drinkG));
 
-  var out = [];
-  blocks.forEach(function(b, i){ if (i) out.push(''); out = out.concat(b); });
   if (rmk) { out.push(''); out.push('Note: ' + rmk); }
-  out.push(''); out.push('Total: ' + gbp(tot));
   return out.join('\n');
 }
 

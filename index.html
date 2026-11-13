@@ -218,6 +218,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 // ═════════════════════════════════════════════════════════════
 
 // WhatsApp group (unchanged)
+var APP_VERSION = 'v2026-11-13 · order total in WhatsApp message';
 var WA_GROUP_LINK = 'https://chat.whatsapp.com/IP4B7ppeDRDJfS5V4PilIf?s=hd&p=i&mlu=4&ilr=4';
 
 var STATION_NAME = {water:'Drinks Station', fire:'Fire Station', noodle:'Noodle Station'};
@@ -999,8 +1000,17 @@ function noodleItemLines(it) {
 }
 function trimBlank(lines) { while (lines.length && lines[lines.length - 1] === '') lines.pop(); return lines; }
 
-// Compact kitchen message. No prices / totals (those stay in the POS, cart and history).
-// `tot` is still accepted so the call in sendOrder() is unchanged.
+// Compact order message: one message for the whole order, one block per station.
+// Item prices are NOT shown per station; the final order total is printed ONCE, on the last line of the complete message.
+// `tot` is the same figure sendOrder() stores in the order history (cartTotal()); if it is ever missing or invalid the total
+// is re-added up from the order items themselves, so the message can never go out without a correct total.
+function orderTotalFromItems(byStation) {
+  var pence = 0;
+  Object.keys(byStation || {}).forEach(function(st){
+    byStation[st].forEach(function(it){ pence += Math.round((it.p || 0) * 100) * (it.qty || 0); });
+  });
+  return pence / 100;
+}
 function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, rmk, tot, noodleTaskItems) {
   var ts  = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
   var tag = ' | #' + no + ' | ' + waTable(table) + ' | ' + ts;
@@ -1034,7 +1044,10 @@ function buildSmartMessages(byStation, fireTaskTops, waterTaskNotes, table, no, 
   });
   if (drinkG.length) out = out.concat(block('DRINKS', drinkG));
 
-  if (rmk) { out.push(''); out.push('Note: ' + rmk); }
+  out.push('');
+  if (rmk) out.push('Note: ' + rmk);
+  var total = (typeof tot === 'number' && isFinite(tot)) ? tot : orderTotalFromItems(byStation);
+  out.push('Total: ' + gbp(total));
   return out.join('\n');
 }
 
@@ -1202,6 +1215,7 @@ function openManage() {
            '<button class="pause-btn' + (ip ? ' paused' : '') + '" onclick="togglePause(\'' + it.id + '\')">' + (ip ? 'Resume' : 'Pause') + '</button></div>';
     }
   }
+  h += '<div style="margin-top:14px;font-size:10px;color:var(--text3);text-align:center">App version: ' + esc(APP_VERSION) + '</div>';
   h += '<div style="margin-top:16px"><button onclick="closeManage()" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--text);color:var(--bg);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Close</button></div>';
   document.getElementById('manage-sheet').innerHTML = h;
   document.getElementById('manage-overlay').classList.add('on');
